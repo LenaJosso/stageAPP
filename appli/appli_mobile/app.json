@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "appli_mobile",
+    "slug": "appli_mobile",
+    "version": "1.0.0",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "L'app a besoin du Bluetooth pour détecter les appareils à proximité.",
+        "NSBluetoothPeripheralUsageDescription": "L'app a besoin du Bluetooth pour communiquer avec les appareils."
+      }
+    },
+    "android": {
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "neverForLocation": true
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": { "minSdkVersion": 23 }
+        }
+      ]
+    ]
+  }
+}
