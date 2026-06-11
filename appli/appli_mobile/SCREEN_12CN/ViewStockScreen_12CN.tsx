@@ -1,14 +1,24 @@
 import React from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useStock } from "./StockContext_12CN";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { globalStyles } from "../globalStyles";
+import { RootStackParamList, Lot } from "../TYPE/type_12CN";
+import { GradientText } from "../GradientText";
 
-export default function ViewStockScreen(): React.JSX.Element {
+
+export default function ViewStockScreen({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "ViewStock">): React.JSX.Element {
   const { stocks, deleteLot } = useStock();
 
   return (
-    <View style={globalStyles.screen}>
-      <Text style={globalStyles.title}>Liste du Stock</Text>
+<View style={globalStyles.mainContainer}>
+    
+          {/* CONTENU PRINCIPAL (MILIEU) */}
+          <View style={globalStyles.screen}>
+          <GradientText style={globalStyles.textDegrade} text="Liste du Stock"/>
+
       {stocks.length === 0 ? (
         <Text style={globalStyles.emptyText}>
           Aucun produit en stock pour le moment.
@@ -33,11 +43,12 @@ export default function ViewStockScreen(): React.JSX.Element {
                 onPress={() => deleteLot(item.id)}
               >
                 <Text style={globalStyles.deleteButtonText}>X</Text>
-              </Pressable>
-            </View>
-          )}
-        />
-      )}
+                </Pressable>
+              </View>
+            )}
+          />
+        )}
+      </View>
     </View>
   );
 }

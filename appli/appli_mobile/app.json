@@ -7,8 +7,10 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "L'app a besoin du Bluetooth pour détecter les appareils à proximité.",
-        "NSBluetoothPeripheralUsageDescription": "L'app a besoin du Bluetooth pour communiquer avec les appareils."
-      }
+        "NSBluetoothPeripheralUsageDescription": "L'app a besoin du Bluetooth pour communiquer avec les appareils.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "stage"
     },
     "android": {
       "permissions": [
@@ -17,7 +19,9 @@
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.ACCESS_FINE_LOCATION"
-      ]
+      ],
+      "minSdkVersion": 24,
+      "package": "com.anonymous.appli_mobile"
     },
     "plugins": [
       [
@@ -30,9 +34,17 @@
       [
         "expo-build-properties",
         {
-          "android": { "minSdkVersion": 23 }
+          "android": {
+            "minSdkVersion": 24
+          }
         }
-      ]
-    ]
+      ],
+      "expo-status-bar"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "43e86a0e-ae97-4b09-a1c5-912c3f3d8995"
+      }
+    }
   }
 }

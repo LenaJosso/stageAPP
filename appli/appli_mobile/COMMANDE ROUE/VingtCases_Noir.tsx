@@ -8,6 +8,7 @@ import {
   Easing,
 } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_20cases_noir";
+import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Roue } from "../Roue";
 import Triangle from "../Triangle";
 import { globalStyles } from "../globalStyles";
@@ -47,6 +48,9 @@ export default function CommandeScreen(): React.JSX.Element {
     { id: 19, label: "20", couleur: "#76bdd7", valeur: 1 },
   ];
 
+
+    const insets = useSafeAreaInsets();
+    
   const TAILLE_ROUE = 320;
   const RAYON_LEDS = 150;
   const nbQuartiers = mesQuartiers.length;
@@ -237,7 +241,7 @@ export default function CommandeScreen(): React.JSX.Element {
 
   return (
     <View style={globalStyles.mainContainer}>
-      <View style={globalStyles.leftContainer}>
+      <View style={globalStyles.rightContainer}>
         {estDesactive && (
           <Text
             style={[
@@ -439,37 +443,41 @@ export default function CommandeScreen(): React.JSX.Element {
       </View>
 
       {/* Barre d'historique latérale */}
-      <View style={globalStyles.sidebar}>
-        <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
-        <ScrollView contentContainerStyle={globalStyles.sidebarScroll}>
-          {state.history.map((idLot, index) => {
-            const quartier = mesQuartiers.find((q) => q.id === idLot);
-            return (
-              <View key={index} style={globalStyles.historyItem}>
-                <Text style={globalStyles.historyIndex}>{index + 1}.</Text>
-                <View
-                  style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: 6,
-                    backgroundColor: quartier?.couleur || "#ccc",
-                    marginRight: 8,
-                    alignSelf: "center",
-                  }}
-                />
-                <Text style={globalStyles.historyText}>
-                  {quartier ? quartier.label : `Lot Inconnu (${idLot})`}
-                </Text>
-              </View>
-            );
-          })}
-          {state.history.length === 0 && (
-            <Text style={globalStyles.emptyHistory}>
-              Aucun tirage dans l'historique
-            </Text>
-          )}
-        </ScrollView>
-      </View>
-    </View>
-  );
-}
+            <SafeAreaProvider style={[
+                    globalStyles.customSidebar, // Tu peux garder ton style de base (pour la couleur du fond par exemple)
+                    {flex: 0.1, paddingBottom: insets.bottom}
+                  ]}>
+              <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
+              <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
+                {state.history.map((idLot, index) => {
+                  const quartier = mesQuartiers.find((q) => q.id === idLot);
+                  return (
+                    <View key={index} style={globalStyles.historyItem}>
+                      <Text style={globalStyles.historyIndex}>{index + 1}.</Text>
+                      <View
+                        style={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: 6,
+                          backgroundColor: quartier?.couleur || "#ccc",
+                          marginRight: 8,
+                          alignSelf: "center",
+                        }}
+                      />
+                      <Text style={globalStyles.historyText}>
+                        {quartier ? quartier.label : `Lot Inconnu (${idLot})`}
+                      </Text>
+                    </View>
+                  );
+                })}
+      
+                {state.history.length === 0 && (
+                  <Text style={globalStyles.emptyHistory}>
+                    Aucun tirage dans l'historique
+                  </Text>
+                )}
+              </ScrollView>
+            </SafeAreaProvider>
+          </View>
+        );
+      }

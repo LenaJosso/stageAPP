@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_20cases_noir";
+import { RootStackParamList, Lot } from "../TYPE/type_20CN";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Buffer } from "buffer";
 import { globalStyles } from "../globalStyles";
+import { GradientText } from "../GradientText";
 
-export default function StatisticsScreen(): React.JSX.Element {
+
+export default function StatisticsScreen({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "Statistics">): React.JSX.Element {
   const { state, lireCaracteristique, STATS_CHAR_UUID, INFO_CHAR_UUID } =
     useBleGlobal();
   const [totalSpins, setTotalSpins] = useState<number>(0);
@@ -44,20 +50,42 @@ export default function StatisticsScreen(): React.JSX.Element {
   }, [state.status]);
 
   return (
+<View style={globalStyles.mainContainer}>
+
     <View style={globalStyles.screen}>
-      <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 15 }}>
+      <GradientText style={globalStyles.textDegrade} text="Statistiques"/>
+      <Text
+        style={{
+          fontSize: 22,
+          fontWeight: "bold",
+          marginBottom: 20,
+          marginTop:25,
+          color: "#ffffff",
+        }}
+      >
         Total spins : {totalSpins}
       </Text>
 
-      <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 10 }}>
+      <Text
+        style={{
+          fontSize: 22,
+          fontWeight: "600",
+          marginBottom: 20,
+          color: "#ffffff",
+        }}
+      >
         Statistiques par case :
       </Text>
 
       {hitsParCase.map((hits, index) => (
-        <Text key={index} style={{ fontSize: 15, marginVertical: 4 }}>
+        <Text
+          key={index}
+          style={{ fontSize: 20, marginVertical: 4, color: "#ffffff" }}
+        >
           Case {index + 1} : {hits} hits
         </Text>
       ))}
+    </View>
     </View>
   );
 }

@@ -61,30 +61,5 @@ export default function AddLotScreen({
       </Pressable>
     </View>
         </View>
-    /*<View style={globalStyles.screen}>
-      <Text style={globalStyles.title}>Ajouter un lot</Text>
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Nom du produit"
-        value={nom}
-        onChangeText={setNom}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Quantité"
-        value={quantite}
-        onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
-        keyboardType="numeric"
-      />
-      <Pressable style={globalStyles.buttonValid} onPress={handleValidation}>
-        <Text style={globalStyles.buttonText}>Ajouter le lot</Text>
-      </Pressable>
-    </View>*/
   );
 }

@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, Lot } from "../TYPE/type_12CN";
 import { useStock } from "./StockContext_12CN";
+import { GradientText } from "../GradientText";
 import { globalStyles } from "../globalStyles";
 
 export default function AddLotScreen({
@@ -29,10 +30,16 @@ export default function AddLotScreen({
   };
 
   return (
-    <View style={globalStyles.screen}>
-      <Text style={globalStyles.title}>Ajouter un lot</Text>
+    <View style={globalStyles.mainContainer}>
+    
+          {/* CONTENU PRINCIPAL (MILIEU) */}
+          <View style={globalStyles.screen}>
+       <GradientText
+                style={globalStyles.textDegrade}
+                text="Ajouter un lot "
+              />
       <TextInput
-        style={globalStyles.input}
+        style={[globalStyles.input, {marginTop:35}]}
         placeholder="Nom du produit"
         value={nom}
         onChangeText={setNom}
@@ -48,11 +55,11 @@ export default function AddLotScreen({
         placeholder="Quantité"
         value={quantite}
         onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
-        keyboardType="numeric"
       />
-      <Pressable style={globalStyles.buttonValid} onPress={handleValidation}>
+      <Pressable style={globalStyles.button} onPress={handleValidation}>
         <Text style={globalStyles.buttonText}>Ajouter le lot</Text>
       </Pressable>
     </View>
+        </View>
   );
 }

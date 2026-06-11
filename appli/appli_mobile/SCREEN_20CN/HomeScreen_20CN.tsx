@@ -1,82 +1,77 @@
 import React from "react";
 import { View, Text, Pressable, Image } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../TYPE/type_12C";
+import { RootStackParamList } from "../TYPE/type_20CN";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
+import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function HomeScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "Home">): React.JSX.Element {
-  const data = [
-    { label: "1. Nouveaux lots", value: "AddLot" },
-    { label: "2. Voir le stock", value: "ViewStock" },
-    { label: "3. Commande", value: "Commande" },
-    { label: "4. Statistics", value: "Statistics" },
-  ];
-
+const insets = useSafeAreaInsets();
   return (
-    <View style={globalStyles.mainContainer}>
-      {/* MENU SUR LE CÔTÉ (SIDEBAR NOIRE) */}
-      <View style={globalStyles.customSidebar}>
-        <Text style={globalStyles.sidebarTitle}>Navigation</Text>
-        <Dropdown
-          style={{
-            backgroundColor: "#262626", // Fond du sélecteur sombre
-            padding: 10,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: "#252525",
-            width: "100%",
-          }}
-          containerStyle={{
-            backgroundColor: "#262626", // Fond de la liste déroulante interne
-            borderColor: "#475569",
-          }}
-          itemTextStyle={{
-            color: "#e2e8f0", // Couleur des options en gris clair
-          }}
-          activeColor="#334155" // Couleur au survol d'une option
-          placeholderStyle={{ fontSize: 13, color: "#94a3b8" }}
-          selectedTextStyle={{
-            fontSize: 13,
-            color: "#ffffff",
-            fontWeight: "600",
-          }}
-          placeholder="Choisir..."
-          data={data}
-          labelField="label"
-          valueField="value"
-          onChange={(item) => {
-            navigation.navigate(item.value as any);
-          }}
-        />
-      </View>
-
-      {/* CONTENU PRINCIPAL (MILIEU) */}
-      <View style={globalStyles.leftContainer}>
+    <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
+      
+      {/* CONTENU PRINCIPAL (HAUT / MILIEU) */}
+      <View style={[globalStyles.rightContainer, { flex: 1, justifyContent: "center", alignItems: "center" }]}>
         <Image
           source={require("../assets/lemiaLogo.png")}
-          style={{ width: 320, height: 100 }}
+          style={{ width: 320, height: 100, resizeMode: "contain", marginBottom: 60 }}
+        />
+
+        <GradientText
+          style={[globalStyles.textDegrade, {fontFamily : "Quicksand-Regular"}]}
+          text="Bienvenue sur la commande "
         />
         <GradientText
-          style={{
-            fontSize: 40,
-            fontWeight: "bold",
-            justifyContent: "center",
-            alignContent: "center",
-          }}
-          text="Bienvenue sur la commande de votre roue"
-        ></GradientText>
+          style={globalStyles.textDegrade}
+          text="de votre roue"
+        />
 
         <Pressable
-          style={[globalStyles.button, { marginTop: 70 }]}
+          style={[globalStyles.button, { marginTop: 60 }]}
           onPress={() => navigation.navigate("ConnexionBluetooth")}
         >
           <Text style={globalStyles.buttonText}>Connexion Bluetooth</Text>
         </Pressable>
       </View>
+
+      {/* VERITABLE TABBAR HORIZONTALE EN BAS */}
+      <SafeAreaProvider style={[
+        globalStyles.customSidebar, // Tu peux garder ton style de base (pour la couleur du fond par exemple)
+        {flex: 0.1, paddingBottom: insets.bottom}
+      ]}>
+        
+        <Pressable
+          style={[globalStyles.buttonSidebar, { flex: 1, alignItems: "center", justifyContent: "center" }]}
+          onPress={() => navigation.navigate("AddLot")}
+        >
+          <Text style={[globalStyles.textSibebar, ]}>Ajouter lot</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={[globalStyles.buttonSidebar, { flex: 1, alignItems: "center", justifyContent: "center" }]}
+          onPress={() => navigation.navigate("ViewStock")}
+        >
+          <Text style={[globalStyles.textSibebar]}>Voir stock</Text>
+        </Pressable>
+        
+        <Pressable
+          style={[globalStyles.buttonSidebar, { flex: 1, alignItems: "center", justifyContent: "center" }]}
+          onPress={() => navigation.navigate("Commande")}
+        >
+          <Text style={[globalStyles.textSibebar]}>Commande</Text>
+        </Pressable>
+        
+        <Pressable
+          style={[globalStyles.buttonSidebar, { flex: 1, alignItems: "center", justifyContent: "center" }]}
+          onPress={() => navigation.navigate("Statistics")}
+        >
+          <Text style={[globalStyles.textSibebar]}>Stats</Text>
+        </Pressable>
+      </SafeAreaProvider>
+
     </View>
   );
 }

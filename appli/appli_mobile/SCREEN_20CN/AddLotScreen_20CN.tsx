@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, Lot } from "../TYPE/type_20CN";
 import { useStock } from "./StockContext_20CN";
 import { globalStyles } from "../globalStyles";
+import { GradientText } from "../GradientText";
 
 export default function AddLotScreen({
   navigation,
@@ -29,30 +30,36 @@ export default function AddLotScreen({
   };
 
   return (
-    <View style={globalStyles.screen}>
-      <Text style={globalStyles.title}>Ajouter un lot</Text>
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Nom du produit"
-        value={nom}
-        onChangeText={setNom}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Quantité"
-        value={quantite}
-        onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
-        keyboardType="numeric"
-      />
-      <Pressable style={globalStyles.buttonValid} onPress={handleValidation}>
-        <Text style={globalStyles.buttonText}>Ajouter le lot</Text>
-      </Pressable>
-    </View>
-  );
-}
+      <View style={globalStyles.mainContainer}>
+      
+            {/* CONTENU PRINCIPAL (MILIEU) */}
+            <View style={globalStyles.screen}>
+         <GradientText
+                  style={globalStyles.textDegrade}
+                  text="Ajouter un lot "
+                />
+        <TextInput
+          style={[globalStyles.input, {marginTop:35}]}
+          placeholder="Nom du produit"
+          value={nom}
+          onChangeText={setNom}
+        />
+        <TextInput
+          style={globalStyles.input}
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+        />
+        <TextInput
+          style={globalStyles.input}
+          placeholder="Quantité"
+          value={quantite}
+          onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
+        />
+        <Pressable style={globalStyles.button} onPress={handleValidation}>
+          <Text style={globalStyles.buttonText}>Ajouter le lot</Text>
+        </Pressable>
+      </View>
+          </View>
+    );
+  }
