@@ -6,7 +6,7 @@ import { globalStyles } from "./globalStyles";
 
 // IMPORT 12 CASES NOIRES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-/*import { StockProvider } from "./SCREEN_12CN/StockContext_12CN";
+import { StockProvider } from "./SCREEN_12CN/StockContext_12CN";
 import { BleProvider } from "./BLE_CONTEXT/CONTEXT_12cases_noir";
 import { RootStackParamList } from "./TYPE/type_12CN";
 
@@ -15,11 +15,11 @@ import AddLotScreen from "./SCREEN_12CN/AddLotScreen_12CN";
 import ViewStockScreen from "./SCREEN_12CN/ViewStockScreen_12CN";
 import ConnexionBluetoothScreen from "./SCREEN_12CN/ConnexionBluetoothScreen_12CN";
 import CommandeScreen from "./COMMANDE ROUE/DouzesCases_Noir";
-import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";*/
+import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";
 
 // IMPORT 12 CASES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-import { StockProvider } from "./SCREEN_12C/StockContext_12C";
+/*import { StockProvider } from "./SCREEN_12C/StockContext_12C";
 import { BleProvider } from "./BLE_CONTEXT/CONTEXT_12cases";
 import { RootStackParamList } from "./TYPE/type_12C";
 
@@ -28,7 +28,7 @@ import AddLotScreen from "./SCREEN_12C/AddLotScreen_12C";
 import ViewStockScreen from "./SCREEN_12C/ViewStockScreen_12C";
 import ConnexionBluetoothScreen from "./SCREEN_12C/ConnexionBluetoothScreen_12C";
 import CommandeScreen from "./COMMANDE ROUE/DouzesCases";
-import StatisticsScreen from "./SCREEN_12C/StatisticsScreen_12C";
+import StatisticsScreen from "./SCREEN_12C/StatisticsScreen_12C";*/
 
 // IMPORT 20 CASES NOIRES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
@@ -57,41 +57,41 @@ export default function App(): React.JSX.Element {
                 headerStyle: {
                   backgroundColor: "#000000",
                 },
-                headerTintColor: "#fff",
                 headerTitleStyle: {
                   fontWeight: "bold",
+                  
                 },
               }}
             >
               <Stack.Screen
                 name="Home"
                 component={HomeScreen}
-                options={{ title: "Accueil", headerTintColor: "#FF0000" }}
+                options={{ title: "Accueil", headerTintColor: "#e33625", headerTitleAlign: "center" }}
               />
               <Stack.Screen
                 name="AddLot"
                 component={AddLotScreen}
-                options={{ title: "Ajouter un Lot" }}
+                options={{ title: "Ajouter un Lot", headerTintColor: "#e33625", headerTitleAlign: "left"  }}
               />
               <Stack.Screen
                 name="ViewStock"
                 component={ViewStockScreen}
-                options={{ title: "Inventaire du Stock" }}
+                options={{ title: "Inventaire du Stock", headerTintColor: "#e33625", headerTitleAlign: "left"  }}
               />
               <Stack.Screen
                 name="ConnexionBluetooth"
                 component={ConnexionBluetoothScreen}
-                options={{ title: "Appairage Bluetooth" }}
+                options={{ title: "Appairage Bluetooth", headerTintColor: "#e33625", headerTitleAlign: "left"  }}
               />
               <Stack.Screen
                 name="Commande"
                 component={CommandeScreen}
-                options={{ title: "Contrôle de la Roue" }}
+                options={{ title: "Contrôle de la Roue", headerTintColor: "#e33625", headerTitleAlign: "left"  }}
               />
               <Stack.Screen
                 name="Statistics"
                 component={StatisticsScreen}
-                options={{ title: "Statistiques ESP32" }}
+                options={{ title: "Statistiques ESP32", headerTintColor: "#e33625", headerTitleAlign: "left"  }}
               />
             </Stack.Navigator>
           </View>

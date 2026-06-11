@@ -4,7 +4,7 @@ import Svg, { Path } from "react-native-svg";
 export const Triangle = () => {
   return (
     <Svg width="20" height="20" viewBox="0 0 20 20">
-      <Path d="M 0 0 L 20 0 L 10 20 Z" fill="#30303D" />
+      <Path d="M 0 0 L 20 0 L 10 20 Z" fill="#e33625" />
       {/* 2 chiffres apres chaque lettre = axe x et y
       M= move to, c'est le pt de depart
         L 20 0= line to (trace droite horizontale)

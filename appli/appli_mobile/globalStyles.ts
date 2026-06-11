@@ -4,16 +4,16 @@ export const globalStyles = StyleSheet.create({
   // --- STYLES GENERAUX / ECRANS ---
   screen: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     padding: 20,
     backgroundColor: "#000000", // Fond noir
   },
   textDegrade: {
-    fontSize: 40,
+    
+    fontSize: 32,             // Réduit légèrement (40 pouvait forcer le texte à déborder)
     fontWeight: "bold",
-    justifyContent: "center",
-    alignContent: "center",
+    textAlign: "center",      // TRÈS IMPORTANT pour centrer le texte dans son propre bloc
+    width: "100%",            // Force le texte à aller à la ligne si c'est trop long
   },
   container: {
     flex: 1,
@@ -24,16 +24,17 @@ export const globalStyles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    flexDirection: "row",
-    backgroundColor: "#000000", // Changé en noir (anciennement #fff)
+    flexDirection: "column",
+    backgroundColor: "#000000", 
   },
-  leftContainer: {
-    flex: 3,
-    alignItems: "center",
-    alignContent: "center",
-    padding: 10,
-    backgroundColor: "#000000", // Assure le fond noir au centre
+  
+  rightContainer: {
+    flex: 0.9,          // S'aligne aussi sur toute la hauteur
+    justifyContent: 'center', // Centre le contenu (logo, texte) verticalement
+    alignItems: 'center',     // Centre le contenu horizontalement 
   },
+  
+  
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -59,11 +60,18 @@ export const globalStyles = StyleSheet.create({
 
   // --- BOUTONS ---
   button: {
-    backgroundColor: "#2563eb",
+    backgroundColor: "#e33625",
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 8,
-    width: "100%",
+    borderRadius: 10,
+    width: "75%",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 19,
+    fontWeight: "bold",
+    justifyContent: "center",
     alignItems: "center",
   },
   buttonValid: {
@@ -76,7 +84,7 @@ export const globalStyles = StyleSheet.create({
     marginTop: 10,
   },
   btn: {
-    backgroundColor: "#2563eb",
+    backgroundColor: "#e33625",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -84,29 +92,21 @@ export const globalStyles = StyleSheet.create({
   btnGray: {
     backgroundColor: "#4b5563", // Gris un peu plus clair pour le contraste
   },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  
   btnText: {
     color: "white",
     fontWeight: "bold",
   },
-  texteEnHaut: {
-    color: "ff0000",
-  },
 
   // --- FORMULAIRES ---
   input: {
-    width: "100%",
-    backgroundColor: "#1e293b", // Fond d'input sombre (anciennement white)
-    paddingHorizontal: 15,
-    paddingVertical: 12,
+    width: "90%",
+    backgroundColor: "#303030", 
+    padding:15,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#475569", // Bordure grise
-    marginBottom: 15,
+    borderColor: "#404040", // Bordure grise
+    marginBottom: 35,
     fontSize: 16,
     color: "white", // Texte écrit en blanc
   },
@@ -116,14 +116,15 @@ export const globalStyles = StyleSheet.create({
     color: "#64748b",
     fontSize: 16,
     fontStyle: "italic",
+    marginTop : 20,
   },
   stockItem: {
-    backgroundColor: "#1e293b", // Fond d'item sombre (anciennement white)
+    backgroundColor: "#303030", 
     padding: 15,
     borderRadius: 8,
-    marginBottom: 10,
+    marginTop: 35,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: "#404040",
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -258,28 +259,52 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: "#30303D",
   },
   sidebar: {
-    flex: 1,
-    borderLeftWidth: 1,
-    borderLeftColor: "#334155",
-    backgroundColor: "#0f172a",
-    paddingTop: 40,
-    paddingHorizontal: 10,
-  },
-  // Style mis à jour pour ton menu déroulant sur le côté gauche
-  customSidebar: {
-    width: 210,
-    backgroundColor: "#171717", // Fond noir/bleuté très sombre pour distinguer le menu
-    borderRightWidth: 1,
-    borderRightColor: "#242424",
-    paddingTop: 50,
+    height: "10%", // Prend environ 10% de la hauteur de l'écran
+    width: "100%", // Prend toute la largeur désormais
+    backgroundColor: "#171717",
+    borderTopWidth: 1, // Bordure sur le dessus plutôt qu'à droite
+    borderTopColor: "#242424",
+    paddingTop: 8, // Réduit pour s'adapter à un petit espace de 10%
     paddingHorizontal: 12,
+    flexDirection: "row", // Optionnel : pour aligner le titre et la liste côte à côte si tu veux gagner de la place
+    alignItems: "center",
   },
+
+  textSibebar:{
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+    textAlignVertical :"top",
+  textAlign: "center"
+
+  },
+ 
+  customSidebar: {
+    flexDirection: "row",          // Aligne les boutons horizontalement
+          justifyContent: "space-around",
+          alignItems: "center",         
+          width: "100%",                 
+          height: "10%",           
+          backgroundColor: "#000000",    
+  },
+  buttonSidebar: {
+    width: "100%",
+    height : "100%",
+    backgroundColor: "#303030", 
+    borderWidth: 1,
+    borderRightWidth:1,
+    borderColor: "#404040",
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+      
+  },
+
   sidebarTitle: {
-    fontSize: 16,
+    fontSize: 14,
+    marginRight: 10, // Un peu d'espace si aligné en ligne
+    color: "#f1f5f9",
     fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-    color: "#f1f5f9", // Texte blanc (anciennement #333)
   },
   ledContainer: {
     position: "absolute",
@@ -297,16 +322,17 @@ export const globalStyles = StyleSheet.create({
     borderColor: "#737373",
   },
   sidebarScroll: {
-    paddingBottom: 20,
+    flexDirection: "row", // Permet à l'historique de défiler horizontalement de gauche à droite !
+    gap: 15, // Espace entre chaque élément de l'historique
+    alignItems: "center",
   },
   historyItem: {
     flexDirection: "row",
-    backgroundColor: "#1e293b", // Fond d'historique sombre (anciennement #fff)
-    padding: 8,
-    borderRadius: 5,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#334155",
+    alignItems: "center",
+    backgroundColor: "#242424", // Un petit fond pour détacher les items s'ils défilent horizontalement
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
   historyIndex: {
     fontWeight: "bold",

@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../TYPE/type_12C";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
 import { globalStyles } from "../globalStyles";
+import { GradientText } from "../GradientText";
 
 export default function ConnexionBluetoothScreen({
   navigation,
@@ -40,8 +41,14 @@ export default function ConnexionBluetoothScreen({
     state.status === "scanning" || enCoursDenvoi;
 
   return (
+      <View style={globalStyles.mainContainer}>
+
+
     <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>ESP32 ↔ React Native</Text>
+      <GradientText
+                      style={[globalStyles.textDegrade, {marginBottom: 20}]}
+                      text="Connexion à la roue"
+                    />
       <Text style={globalStyles.status}>État : {state.status}</Text>
       {state.statusText && (
         <Text style={globalStyles.info}>ℹ️ {state.statusText}</Text>
@@ -137,6 +144,7 @@ export default function ConnexionBluetoothScreen({
           </View>
         </View>
       </Modal>
+    </View>
     </View>
   );
 }

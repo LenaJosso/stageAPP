@@ -8,6 +8,7 @@ import {
   Easing,
 } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
+import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Roue } from "../Roue";
 import Triangle from "../Triangle";
 import { globalStyles } from "../globalStyles";
@@ -26,7 +27,7 @@ export default function CommandeScreen(): React.JSX.Element {
 
   const mesQuartiers = [
     { id: 0, label: "Lot 1", couleur: "#02b801", valeur: 1 },
-    { id: 1, label: "LGros Lot", couleur: "#ff0000", valeur: 1 },
+    { id: 1, label: "Gros Lot", couleur: "#ff0000", valeur: 1 },
     { id: 2, label: "Lot 3", couleur: "#e6b6ff", valeur: 1 },
     { id: 3, label: "Lot 4", couleur: "#a137d1", valeur: 1 },
     { id: 4, label: "Gros Lot", couleur: "#ff0000", valeur: 1 },
@@ -44,6 +45,8 @@ export default function CommandeScreen(): React.JSX.Element {
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const dernierIndexRef = useRef<number | null>(null);
   const [lotGagnant, setLotGagnant] = useState<string | null>(null);
+
+  const insets = useSafeAreaInsets();
 
   const gererClicTourner = (index?: number) => {
     setLotGagnant(null);
@@ -109,7 +112,7 @@ export default function CommandeScreen(): React.JSX.Element {
 
   return (
     <View style={globalStyles.mainContainer}>
-      <View style={globalStyles.leftContainer}>
+      <View style={globalStyles.rightContainer}>
         {estDesactive && (
           <Text
             style={[
@@ -201,9 +204,12 @@ export default function CommandeScreen(): React.JSX.Element {
       </View>
 
       {/* Barre d'historique latérale */}
-      <View style={globalStyles.sidebar}>
+      <SafeAreaProvider style={[
+              globalStyles.customSidebar, // Tu peux garder ton style de base (pour la couleur du fond par exemple)
+              {flex: 0.1, paddingBottom: insets.bottom}
+            ]}>
         <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
-        <ScrollView contentContainerStyle={globalStyles.sidebarScroll}>
+        <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
           {state.history.map((idLot, index) => {
             const quartier = mesQuartiers.find((q) => q.id === idLot);
             return (
@@ -232,7 +238,7 @@ export default function CommandeScreen(): React.JSX.Element {
             </Text>
           )}
         </ScrollView>
-      </View>
+      </SafeAreaProvider>
     </View>
   );
 }

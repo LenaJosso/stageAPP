@@ -56,7 +56,7 @@ export const Roue: React.FC<RoueProps> = ({ donnees, taille = 300 }) => {
               <Path
                 d={cheminD}
                 fill={quartier.couleur}
-                stroke="#ffffff"
+                stroke="#404040"
                 strokeWidth="2"
               />
               <SvgText
