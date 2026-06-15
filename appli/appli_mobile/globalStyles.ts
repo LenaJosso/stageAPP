@@ -31,7 +31,7 @@ export const globalStyles = StyleSheet.create({
   rightContainer: {
     flex: 0.9,          // S'aligne aussi sur toute la hauteur
     justifyContent: 'center', // Centre le contenu (logo, texte) verticalement
-    alignItems: 'center',     // Centre le contenu horizontalement 
+    alignItems: 'center',    // Centre le contenu horizontalement 
   },
   
   
@@ -241,8 +241,8 @@ export const globalStyles = StyleSheet.create({
   btnCommande: {
     justifyContent: "center",
     alignItems: "center",
-    width: 55,
-    height: 55,
+    width: 40,
+    height: 40,
     borderRadius: 27.5,
   },
   rowActionGrid: {
@@ -271,6 +271,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   textSibebar:{
+    flexDirection: "row",
     color: "white",
     fontSize: 14,
     fontWeight: "600",

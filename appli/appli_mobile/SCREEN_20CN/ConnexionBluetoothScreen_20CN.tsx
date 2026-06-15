@@ -6,6 +6,8 @@ import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_20cases_noir";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
 
+import { useResponsive } from "../responsive";
+
 export default function ConnexionBluetoothScreen({
   navigation,
 }: NativeStackScreenProps<
@@ -15,6 +17,8 @@ export default function ConnexionBluetoothScreen({
   const { state, scanAndConnect, disconnect, sendPin } = useBleGlobal();
   const [pinInput, setPinInput] = useState("");
   const [enCoursDenvoi, setEnCoursDenvoi] = useState(false);
+
+  const responsive = useResponsive();
 
   const handleValiderPin = async () => {
     if (pinInput.length !== 4 && pinInput.length !== 6) {
@@ -41,110 +45,110 @@ export default function ConnexionBluetoothScreen({
     state.status === "scanning" || enCoursDenvoi;
 
   return (
-        <View style={globalStyles.mainContainer}>
-  
-  
-      <View style={globalStyles.container}>
-        <GradientText
-                        style={[globalStyles.textDegrade, {marginBottom: 20}]}
-                        text="Connexion à la roue"
-                      />
-        <Text style={globalStyles.status}>État : {state.status}</Text>
-        {state.statusText && (
-          <Text style={globalStyles.info}>ℹ️ {state.statusText}</Text>
-        )}
-  
-        {state.error && !isModalVisible && (
-          <Text style={globalStyles.error}>❌ {state.error}</Text>
-        )}
-  
-        {/* Bouton de scan visible si déconnecté ou erreur */}
-        {(state.status === "idle" || state.status === "error") && (
-          <Pressable style={globalStyles.btn} onPress={scanAndConnect}>
-            <Text style={globalStyles.btnText}>
-              {state.essaisRestants < 3
-                ? "Recommencer (Retenter le PIN)"
-                : "Scanner et connecter"}
-            </Text>
-          </Pressable>
-        )}
-  
-        {state.status === "scanning" && (
-          <Text style={globalStyles.info}>Recherche de l'ESP32-Roue...</Text>
-        )}
-  
-        {state.status === "connecting" && (
-          <Text style={globalStyles.info}>
-            Établissement de la liaison Bluetooth...
+      <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
+
+
+    <View style={[globalStyles.container, { padding: responsive.number(16) }]}>
+      <GradientText
+            style={[globalStyles.textDegrade, { fontSize: responsive.fontSize(globalStyles.textDegrade.fontSize ?? 16) }]}
+            text="Connexion à la roue"
+            />
+      <Text style={globalStyles.status}>État : {state.status}</Text>
+      {state.statusText && (
+        <Text style={globalStyles.info}>ℹ️ {state.statusText}</Text>
+      )}
+
+      {state.error && !isModalVisible && (
+        <Text style={globalStyles.error}>❌ {state.error}</Text>
+      )}
+
+      {/* Bouton de scan visible si déconnecté ou erreur */}
+      {(state.status === "idle" || state.status === "error") && (
+        <Pressable style={[globalStyles.btn, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]} onPress={scanAndConnect}>
+          <Text style={globalStyles.btnText}>
+            {state.essaisRestants < 3
+              ? "Recommencer (Retenter le PIN)"
+              : "Scanner et connecter"}
           </Text>
-        )}
-  
-        {state.status === "authenticated" && (
-          <Pressable
-            style={[globalStyles.btn, globalStyles.btnGray, { marginTop: 20 }]}
-            onPress={handleAnnuler}
-          >
-            <Text style={globalStyles.btnText}>Déconnecter</Text>
-          </Pressable>
-        )}
-  
-        {/* POPUP AUTHENTIFICATION */}
-        <Modal visible={isModalVisible} transparent={true} animationType="fade">
-          <View style={globalStyles.modalOverlay}>
-            <View style={globalStyles.modalContainer}>
-              <Text style={globalStyles.modalTitle}>
-                Authentification Requise
-              </Text>
-              <Text style={globalStyles.modalSubtitle}>
-                Veuillez saisir le code PIN de sécurité.
-              </Text>
-  
-              <TextInput
+        </Pressable>
+      )}
+
+      {state.status === "scanning" && (
+        <Text style={globalStyles.info}>Recherche de l'ESP32-Roue...</Text>
+      )}
+
+      {state.status === "connecting" && (
+        <Text style={globalStyles.info}>
+          Établissement de la liaison Bluetooth...
+        </Text>
+      )}
+
+      {state.status === "authenticated" && (
+        <Pressable
+         style={[globalStyles.btn, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]}
+          onPress={handleAnnuler}
+        >
+          <Text style={globalStyles.btnText}>Déconnecter</Text>
+        </Pressable>
+      )}
+
+      {/* POPUP AUTHENTIFICATION */}
+      <Modal visible={isModalVisible} transparent={true} animationType="fade">
+        <View style={globalStyles.modalOverlay}>
+          <View style={globalStyles.modalContainer}>
+            <Text style={globalStyles.modalTitle}>
+              Authentification Requise
+            </Text>
+            <Text style={globalStyles.modalSubtitle}>
+              Veuillez saisir le code PIN de sécurité.
+            </Text>
+
+            <TextInput
+              style={[
+                globalStyles.pinInput,
+                isInterfaceBloquee && { opacity: 0.5 },
+              ]}
+              placeholder="Code PIN"
+              placeholderTextColor="#94a3b8"
+              keyboardType="number-pad"
+              maxLength={6}
+              secureTextEntry={true}
+              value={pinInput}
+              onChangeText={setPinInput}
+              editable={!isInterfaceBloquee}
+            />
+
+            <View style={globalStyles.modalRowButtons}>
+              <Pressable
+                style={[globalStyles.modalBtn, globalStyles.modalBtnCancel]}
+                onPress={handleAnnuler}
+                disabled={enCoursDenvoi}
+              >
+                <Text style={globalStyles.modalBtnTextCancel}>Annuler</Text>
+              </Pressable>
+
+              <Pressable
                 style={[
-                  globalStyles.pinInput,
+                  globalStyles.modalBtn,
+                  globalStyles.modalBtnConfirm,
                   isInterfaceBloquee && { opacity: 0.5 },
                 ]}
-                placeholder="Code PIN"
-                placeholderTextColor="#94a3b8"
-                keyboardType="number-pad"
-                maxLength={6}
-                secureTextEntry={true}
-                value={pinInput}
-                onChangeText={setPinInput}
-                editable={!isInterfaceBloquee}
-              />
-  
-              <View style={globalStyles.modalRowButtons}>
-                <Pressable
-                  style={[globalStyles.modalBtn, globalStyles.modalBtnCancel]}
-                  onPress={handleAnnuler}
-                  disabled={enCoursDenvoi}
-                >
-                  <Text style={globalStyles.modalBtnTextCancel}>Annuler</Text>
-                </Pressable>
-  
-                <Pressable
-                  style={[
-                    globalStyles.modalBtn,
-                    globalStyles.modalBtnConfirm,
-                    isInterfaceBloquee && { opacity: 0.5 },
-                  ]}
-                  onPress={handleValiderPin}
-                  disabled={isInterfaceBloquee}
-                >
-                  <Text style={globalStyles.btnText}>
-                    {enCoursDenvoi ? "Vérification..." : "Valider"}
-                  </Text>
-                </Pressable>
-              </View>
-  
-              <Text style={globalStyles.essaisText}>
-                Tentatives restantes : {state.essaisRestants}
-              </Text>
+                onPress={handleValiderPin}
+                disabled={isInterfaceBloquee}
+              >
+                <Text style={globalStyles.btnText}>
+                  {enCoursDenvoi ? "Vérification..." : "Valider"}
+                </Text>
+              </Pressable>
             </View>
+
+            <Text style={globalStyles.essaisText}>
+              Tentatives restantes : {state.essaisRestants}
+            </Text>
           </View>
-        </Modal>
-      </View>
-      </View>
-    );
-  }
+        </View>
+      </Modal>
+    </View>
+    </View>
+  );
+}

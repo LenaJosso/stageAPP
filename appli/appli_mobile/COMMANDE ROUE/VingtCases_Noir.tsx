@@ -12,6 +12,7 @@ import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-cont
 import { Roue } from "../Roue";
 import Triangle from "../Triangle";
 import { globalStyles } from "../globalStyles";
+import { useResponsive } from "../responsive";
 
 export default function CommandeScreen(): React.JSX.Element {
   const {
@@ -24,6 +25,9 @@ export default function CommandeScreen(): React.JSX.Element {
   } = useBleGlobal();
 
   const estDesactive = state.status !== "authenticated";
+
+  const responsive = useResponsive();
+
 
   const mesQuartiers = [
     { id: 0, label: "1", couleur: "#ed178a", valeur: 1 },
@@ -51,15 +55,15 @@ export default function CommandeScreen(): React.JSX.Element {
 
     const insets = useSafeAreaInsets();
     
-  const TAILLE_ROUE = 320;
-  const RAYON_LEDS = 150;
+  const TAILLE_ROUE = responsive.number(280);
+  const RAYON_LEDS = responsive.number(130);
   const nbQuartiers = mesQuartiers.length;
   const angleParQuartier = 360 / nbQuartiers;
 
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const dernierIndexRef = useRef<number | null>(null);
 
-  // AJOUT : Référence pour mémoriser la LED ciblée localement dès le clic
+  // Référence pour mémoriser la LED ciblée localement dès le clic
   const ledCibleLocaleRef = useRef<number | null>(null);
 
   const [lotGagnant, setLotGagnant] = useState<string | null>(null);
@@ -240,8 +244,8 @@ export default function CommandeScreen(): React.JSX.Element {
     lotGagnant === "Gros Lot" || lotGagnant === "BANKRUPT";
 
   return (
-    <View style={globalStyles.mainContainer}>
-      <View style={globalStyles.rightContainer}>
+    <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
+          <View style={[globalStyles.rightContainer, { padding: responsive.number(16) }]}>
         {estDesactive && (
           <Text
             style={[
@@ -257,7 +261,7 @@ export default function CommandeScreen(): React.JSX.Element {
         <View style={{ marginBottom: 5 }}>
           <Text
             style={{
-              fontSize: 20,
+              fontSize: responsive.fontSize(20),
               fontWeight: "bold",
               color: afficherEnRouge ? "#dc2626" : "#000",
             }}
@@ -272,7 +276,7 @@ export default function CommandeScreen(): React.JSX.Element {
 
         <Animated.View
           style={{
-            marginBottom: 30,
+            marginBottom: responsive.number(30),
             opacity: estDesactive ? 0.5 : 1,
             transform: [{ rotate: rotationInterpolee }],
             width: TAILLE_ROUE,
@@ -324,160 +328,158 @@ export default function CommandeScreen(): React.JSX.Element {
           })}
         </Animated.View>
 
-        {/* Grilles de boutons par quartier */}
-        {[
-          [0, 1, 2, 3, 4],
-          [5, 6, 7, 8, 9],
-          [10, 11, 12, 13, 14],
-          [15, 16, 17, 18, 19],
-        ].map((row, rIdx) => (
-          <View
-            key={rIdx}
-            style={[
-              globalStyles.rowButtons,
-              { opacity: estDesactive ? 0.5 : 1 },
-            ]}
-          >
-            {row.map((idx) => (
-              <Pressable
-                key={idx}
-                disabled={estDesactive}
-                style={[
-                  globalStyles.btnCommande,
-                  { backgroundColor: mesQuartiers[idx].couleur },
-                ]}
-                onPress={() => gererClicTourner(idx)}
-              >
-                <Text style={globalStyles.btnText}>{idx + 1}</Text>
-              </Pressable>
-            ))}
-          </View>
-        ))}
+        {/* Grilles de boutons par quartier - flexWrap pour passer à la ligne si manque de place */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    opacity: estDesactive ? 0.5 : 1,
+                    gap: responsive.number(8),
+                    marginBottom: responsive.number(10),
+                  }}
+                >
+                  {mesQuartiers.map((quartier, idx) => (
+                    <Pressable
+                      key={idx}
+                      disabled={estDesactive}
+                      style={[
+                        globalStyles.btnCommande,
+                        { backgroundColor: quartier.couleur },
+                      ]}
+                      onPress={() => gererClicTourner(idx)}
+                    >
+                      <Text style={globalStyles.btnText}>{idx + 1}</Text>
+                    </Pressable>
+                  ))}
+                </View>
 
         {/* Boutons d'action */}
-        <View
-          style={[
-            globalStyles.rowActionGrid,
-            { opacity: estDesactive ? 0.5 : 1 },
-          ]}
-        >
-          <Pressable
-            disabled={estDesactive}
-            style={globalStyles.btnSpin}
-            onPress={() => gererClicTourner()}
-          >
-            <Text style={globalStyles.btnText}>SPIN</Text>
-          </Pressable>
-
-          <Pressable
-            disabled={estDesactive}
-            style={[
-              globalStyles.btnSpin,
-              !state.isLocked && { backgroundColor: "#16a34a" },
-            ]}
-            onPress={gererClicLock}
-          >
-            <Text style={[globalStyles.btnText, { textAlign: "center" }]}>
-              {state.isLocked ? "Déverrouiller" : "Verrouiller"}
-            </Text>
-          </Pressable>
-
-          {/* BOUTON BANKRUPT */}
-          <Pressable
-            disabled={
-              estDesactive || state.isSpinning || isGrosLot || isBankrupt
-            }
-            style={[
-              globalStyles.btnSpin,
-              {
-                backgroundColor: "#1a1a1a",
-                borderWidth: 2,
-                borderColor: "#000000",
-                opacity:
-                  estDesactive || state.isSpinning || isGrosLot || isBankrupt
-                    ? 0.4
-                    : 1,
-              },
-            ]}
-            onPress={gererBankrupt}
-          >
-            <Text
-              style={[
-                globalStyles.btnText,
-                { color: "#ffffff", textAlign: "center", fontWeight: "bold" },
-              ]}
-            >
-              BANKRUPT
-            </Text>
-          </Pressable>
-
-          {/* BOUTON GROS LOT */}
-          <Pressable
-            disabled={
-              estDesactive || state.isSpinning || isGrosLot || isBankrupt
-            }
-            style={[
-              globalStyles.btnSpin,
-              {
-                backgroundColor: "#1a1a1a",
-                borderWidth: 2,
-                borderColor: "#dc2626",
-                opacity:
-                  estDesactive || state.isSpinning || isGrosLot || isBankrupt
-                    ? 0.4
-                    : 1,
-              },
-            ]}
-            onPress={gererGrosLot}
-          >
-            <Text
-              style={[
-                globalStyles.btnText,
-                { color: "#dc2626", textAlign: "center", fontWeight: "bold" },
-              ]}
-            >
-              Gros Lot
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Barre d'historique latérale */}
-            <SafeAreaProvider style={[
-                    globalStyles.customSidebar, // Tu peux garder ton style de base (pour la couleur du fond par exemple)
-                    {flex: 0.1, paddingBottom: insets.bottom}
-                  ]}>
-              <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
-              <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
-                {state.history.map((idLot, index) => {
-                  const quartier = mesQuartiers.find((q) => q.id === idLot);
-                  return (
-                    <View key={index} style={globalStyles.historyItem}>
-                      <Text style={globalStyles.historyIndex}>{index + 1}.</Text>
-                      <View
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: 6,
-                          backgroundColor: quartier?.couleur || "#ccc",
-                          marginRight: 8,
-                          alignSelf: "center",
-                        }}
-                      />
-                      <Text style={globalStyles.historyText}>
-                        {quartier ? quartier.label : `Lot Inconnu (${idLot})`}
-                      </Text>
-                    </View>
-                  );
-                })}
-      
-                {state.history.length === 0 && (
-                  <Text style={globalStyles.emptyHistory}>
-                    Aucun tirage dans l'historique
-                  </Text>
-                )}
-              </ScrollView>
-            </SafeAreaProvider>
-          </View>
-        );
-      }
+         <View
+                  style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    opacity: estDesactive ? 0.5 : 1,
+                    gap: responsive.number(8),
+                  }}
+                >
+                  <Pressable
+                    disabled={estDesactive}
+                    style={globalStyles.btnSpin}
+                    onPress={() => gererClicTourner()}
+                  >
+                    <Text style={globalStyles.btnText}>SPIN</Text>
+                  </Pressable>
+                  <Pressable
+                    disabled={estDesactive}
+                    style={[
+                      globalStyles.btnSpin,
+                      !state.isLocked && { backgroundColor: "#16a34a" },
+                    ]}
+                    onPress={gererClicLock}
+                  >
+                    <Text style={[globalStyles.btnText, { textAlign: "center" }]}>
+                      {state.isLocked ? "Déverrouiller" : "Verrouiller"}
+                    </Text>
+                  </Pressable>
+        
+                  {/* BOUTON BANKRUPT */}
+                  <Pressable
+                    disabled={
+                      estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                    }
+                    style={[
+                      globalStyles.btnSpin,
+                      {
+                        backgroundColor: "#1a1a1a",
+                        borderWidth: 2,
+                        borderColor: "#000000",
+                        opacity:
+                          estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                            ? 0.4
+                            : 1,
+                      },
+                    ]}
+                    onPress={gererBankrupt}
+                  >
+                    <Text
+                      style={[
+                        globalStyles.btnText,
+                        { color: "#ffffff", textAlign: "center", fontWeight: "bold" },
+                      ]}
+                    >
+                      BANKRUPT
+                    </Text>
+                  </Pressable>
+        
+                  {/* BOUTON GROS LOT */}
+                  <Pressable
+                    disabled={
+                      estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                    }
+                    style={[
+                      globalStyles.btnSpin,
+                      {
+                        backgroundColor: "#1a1a1a",
+                        borderWidth: 2,
+                        borderColor: "#dc2626",
+                        opacity:
+                          estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                            ? 0.4
+                            : 1,
+                      },
+                    ]}
+                    onPress={gererGrosLot}
+                  >
+                    <Text
+                      style={[
+                        globalStyles.btnText,
+                        { color: "#dc2626", textAlign: "center", fontWeight: "bold" },
+                      ]}
+                    >
+                      Gros Lot
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+        
+              {/* Barre d'historique latérale */}
+              <View style={[
+                globalStyles.customSidebar,
+                { flex: 0.1, paddingBottom: insets.bottom }
+              ]}>
+                <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
+                <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
+                  {state.history.map((idLot, index) => {
+                    const quartier = mesQuartiers.find((q) => q.id === idLot);
+                    return (
+                      <View key={index} style={globalStyles.historyItem}>
+                        <Text style={globalStyles.historyIndex}>{index + 1}.</Text>
+                        <View
+                          style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: 6,
+                            backgroundColor: quartier?.couleur || "#ccc",
+                            marginRight: 8,
+                            alignSelf: "center",
+                          }}
+                        />
+                        <Text style={globalStyles.historyText}>
+                          {quartier ? quartier.label : `Lot Inconnu (${idLot})`}
+                        </Text>
+                      </View>
+                    );
+                  })}
+        
+                  {state.history.length === 0 && (
+                    <Text style={globalStyles.emptyHistory}>
+                      Aucun tirage dans l'historique
+                    </Text>
+                  )}
+                </ScrollView>
+              </View>
+            </View>
+          );
+        }

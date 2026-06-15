@@ -78,7 +78,7 @@ export function useEsp32() {
 
   // REFS POUR CONSERVER LES INSTANCES
   const subscription = useRef<Subscription | null>(null);
-  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // INDEX DES LEDS ROUGES
   const listeLedsRouges = [7, 22, 37, 52];

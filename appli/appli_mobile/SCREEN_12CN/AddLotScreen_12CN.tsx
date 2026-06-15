@@ -5,6 +5,7 @@ import { RootStackParamList, Lot } from "../TYPE/type_12CN";
 import { useStock } from "./StockContext_12CN";
 import { GradientText } from "../GradientText";
 import { globalStyles } from "../globalStyles";
+import { useResponsive } from "../responsive";
 
 export default function AddLotScreen({
   navigation,
@@ -13,6 +14,8 @@ export default function AddLotScreen({
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
   const [quantite, setQuantite] = useState("");
+
+  const responsive = useResponsive();
 
   const handleValidation = () => {
     if (!nom || !quantite) {
@@ -30,36 +33,76 @@ export default function AddLotScreen({
   };
 
   return (
-    <View style={globalStyles.mainContainer}>
-    
-          {/* CONTENU PRINCIPAL (MILIEU) */}
-          <View style={globalStyles.screen}>
-       <GradientText
-                style={globalStyles.textDegrade}
-                text="Ajouter un lot "
-              />
-      <TextInput
-        style={[globalStyles.input, {marginTop:35}]}
-        placeholder="Nom du produit"
-        value={nom}
-        onChangeText={setNom}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Quantité"
-        value={quantite}
-        onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
-      />
-      <Pressable style={globalStyles.button} onPress={handleValidation}>
-        <Text style={globalStyles.buttonText}>Ajouter le lot</Text>
-      </Pressable>
+    <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
+
+      {/* CONTENU PRINCIPAL (MILIEU) */}
+      <View style={[globalStyles.screen, { padding: responsive.number(16) }]}>
+        <GradientText
+          style={[globalStyles.textDegrade, { fontSize: responsive.fontSize(globalStyles.textDegrade.fontSize ?? 16) }]}
+          text="Ajouter un lot "
+        />
+
+        <TextInput
+          style={[
+            globalStyles.input,
+            {
+              marginTop: responsive.number(35),
+              fontSize: responsive.fontSize(globalStyles.input.fontSize ?? 16),
+              paddingVertical: responsive.number(12),
+              paddingHorizontal: responsive.number(12),
+            },
+          ]}
+          placeholder="Nom du produit"
+          placeholderTextColor="#ffffff"
+          value={nom}
+          onChangeText={setNom}
+        />
+        <TextInput
+          style={[
+            globalStyles.input,
+            {
+              fontSize: responsive.fontSize(globalStyles.input.fontSize ?? 16),
+              paddingVertical: responsive.number(12),
+              paddingHorizontal: responsive.number(12),
+            },
+          ]}
+          placeholder="Description"
+          placeholderTextColor="#ffffff"
+          value={description}
+          onChangeText={setDescription}
+        />
+        <TextInput
+          style={[
+            globalStyles.input,
+            {
+              fontSize: responsive.fontSize(globalStyles.input.fontSize ?? 16),
+              paddingVertical: responsive.number(12),
+              paddingHorizontal: responsive.number(12),
+            },
+          ]}
+          placeholder="Quantité"
+          placeholderTextColor="#ffffff"
+          value={quantite}
+          onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
+          keyboardType="numeric"
+        />
+
+        <Pressable
+          style={[
+            globalStyles.button,
+            {
+              marginTop: responsive.number(20),
+              paddingVertical: responsive.number(12),
+              paddingHorizontal: responsive.number(24),
+            },
+          ]}
+          onPress={handleValidation}
+        >
+          <Text style={[globalStyles.buttonText, { fontSize: responsive.fontSize(globalStyles.buttonText.fontSize ?? 16) }]}>
+            Ajouter le lot
+          </Text>
+        </Pressable>
+      </View>
     </View>
-        </View>
   );
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect, useState} from "react";
 import { View, StatusBar, Text, Pressable } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -6,7 +7,7 @@ import { globalStyles } from "./globalStyles";
 
 // IMPORT 12 CASES NOIRES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-import { StockProvider } from "./SCREEN_12CN/StockContext_12CN";
+/*import { StockProvider } from "./SCREEN_12CN/StockContext_12CN";
 import { BleProvider } from "./BLE_CONTEXT/CONTEXT_12cases_noir";
 import { RootStackParamList } from "./TYPE/type_12CN";
 
@@ -15,11 +16,11 @@ import AddLotScreen from "./SCREEN_12CN/AddLotScreen_12CN";
 import ViewStockScreen from "./SCREEN_12CN/ViewStockScreen_12CN";
 import ConnexionBluetoothScreen from "./SCREEN_12CN/ConnexionBluetoothScreen_12CN";
 import CommandeScreen from "./COMMANDE ROUE/DouzesCases_Noir";
-import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";
+import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";*/
 
 // IMPORT 12 CASES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-/*import { StockProvider } from "./SCREEN_12C/StockContext_12C";
+import { StockProvider } from "./SCREEN_12C/StockContext_12C";
 import { BleProvider } from "./BLE_CONTEXT/CONTEXT_12cases";
 import { RootStackParamList } from "./TYPE/type_12C";
 
@@ -28,11 +29,12 @@ import AddLotScreen from "./SCREEN_12C/AddLotScreen_12C";
 import ViewStockScreen from "./SCREEN_12C/ViewStockScreen_12C";
 import ConnexionBluetoothScreen from "./SCREEN_12C/ConnexionBluetoothScreen_12C";
 import CommandeScreen from "./COMMANDE ROUE/DouzesCases";
-import StatisticsScreen from "./SCREEN_12C/StatisticsScreen_12C";*/
+import StatisticsScreen from "./SCREEN_12C/StatisticsScreen_12C";
+
 
 // IMPORT 20 CASES NOIRES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-/*import { StockProvider } from "./SCREEN_12CN/StockContext_20CN";
+/*import { StockProvider } from "./SCREEN_20CN/StockContext_20CN";
 import { BleProvider } from "./BLE_CONTEXT/CONTEXT_20cases_noir";
 import { RootStackParamList } from "./TYPE/type_20CN";
 
@@ -44,8 +46,9 @@ import CommandeScreen from "./COMMANDE ROUE/VingtCases_Noir";
 import StatisticsScreen from "./SCREEN_20CN/StatisticsScreen_20CN";*/
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
+  
 export default function App(): React.JSX.Element {
+
   return (
     <BleProvider>
       <StockProvider>

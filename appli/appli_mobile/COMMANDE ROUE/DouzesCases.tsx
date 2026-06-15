@@ -8,10 +8,11 @@ import {
   Easing,
 } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
-import { useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Roue } from "../Roue";
 import Triangle from "../Triangle";
 import { globalStyles } from "../globalStyles";
+import { useResponsive } from "../responsive";
 
 export default function CommandeScreen(): React.JSX.Element {
   const {
@@ -24,6 +25,8 @@ export default function CommandeScreen(): React.JSX.Element {
   } = useBleGlobal();
 
   const estDesactive = state.status !== "authenticated";
+
+  const responsive = useResponsive();
 
   const mesQuartiers = [
     { id: 0, label: "Lot 1", couleur: "#02b801", valeur: 1 },
@@ -48,6 +51,8 @@ export default function CommandeScreen(): React.JSX.Element {
 
   const insets = useSafeAreaInsets();
 
+  const TAILLE_ROUE = responsive.number(320);
+
   const gererClicTourner = (index?: number) => {
     setLotGagnant(null);
     tournerRoue(index);
@@ -62,7 +67,6 @@ export default function CommandeScreen(): React.JSX.Element {
   };
 
   useEffect(() => {
-    //
     if (state.status === "authenticated") {
       recupererHistorique();
     }
@@ -111,8 +115,8 @@ export default function CommandeScreen(): React.JSX.Element {
   });
 
   return (
-    <View style={globalStyles.mainContainer}>
-      <View style={globalStyles.rightContainer}>
+    <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
+      <View style={[globalStyles.rightContainer, { padding: responsive.number(16) }]}>
         {estDesactive && (
           <Text
             style={[
@@ -126,7 +130,7 @@ export default function CommandeScreen(): React.JSX.Element {
         )}
 
         <View style={{ marginBottom: 5 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          <Text style={{ fontSize: responsive.fontSize(20), fontWeight: "bold" }}>
             {lotGagnant ? `Résultat : ${lotGagnant}` : "Résultat : "}
           </Text>
         </View>
@@ -137,48 +141,49 @@ export default function CommandeScreen(): React.JSX.Element {
 
         <Animated.View
           style={{
-            marginBottom: 20,
+            marginBottom: responsive.number(30),
             opacity: estDesactive ? 0.5 : 1,
             transform: [{ rotate: rotationInterpolee }],
           }}
         >
-          <Roue donnees={mesQuartiers} taille={320} />
+          <Roue donnees={mesQuartiers} taille={TAILLE_ROUE} />
         </Animated.View>
 
-        {/* Grilles de boutons */}
-        {[
-          [0, 1, 2, 3],
-          [4, 5, 6, 7],
-          [8, 9, 10, 11],
-        ].map((row, rIdx) => (
-          <View
-            key={rIdx}
-            style={[
-              globalStyles.rowButtons,
-              { opacity: estDesactive ? 0.5 : 1 },
-            ]}
-          >
-            {row.map((idx) => (
-              <Pressable
-                key={idx}
-                disabled={estDesactive}
-                style={[
-                  globalStyles.btnCommande,
-                  { backgroundColor: mesQuartiers[idx].couleur },
-                ]}
-                onPress={() => gererClicTourner(idx)}
-              >
-                <Text style={globalStyles.btnText}>{idx + 1}</Text>
-              </Pressable>
-            ))}
-          </View>
-        ))}
-
+        {/* Grille de boutons numérotés - flexWrap pour passer à la ligne si manque de place */}
         <View
-          style={[
-            globalStyles.rowActionGrid,
-            { opacity: estDesactive ? 0.5 : 1 },
-          ]}
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            opacity: estDesactive ? 0.5 : 1,
+            gap: responsive.number(8),
+            marginBottom: responsive.number(10),
+          }}
+        >
+          {mesQuartiers.map((quartier, idx) => (
+            <Pressable
+              key={idx}
+              disabled={estDesactive}
+              style={[
+                globalStyles.btnCommande,
+                { backgroundColor: quartier.couleur },
+              ]}
+              onPress={() => gererClicTourner(idx)}
+            >
+              <Text style={globalStyles.btnText}>{idx + 1}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Boutons d'action - flexWrap pour passer à la ligne si manque de place */}
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            opacity: estDesactive ? 0.5 : 1,
+            gap: responsive.number(8),
+          }}
         >
           <Pressable
             disabled={estDesactive}
@@ -204,10 +209,10 @@ export default function CommandeScreen(): React.JSX.Element {
       </View>
 
       {/* Barre d'historique latérale */}
-      <SafeAreaProvider style={[
-              globalStyles.customSidebar, // Tu peux garder ton style de base (pour la couleur du fond par exemple)
-              {flex: 0.1, paddingBottom: insets.bottom}
-            ]}>
+      <View style={[
+        globalStyles.customSidebar,
+        { flex: 0.1, paddingBottom: insets.bottom }
+      ]}>
         <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
         <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
           {state.history.map((idLot, index) => {
@@ -238,7 +243,7 @@ export default function CommandeScreen(): React.JSX.Element {
             </Text>
           )}
         </ScrollView>
-      </SafeAreaProvider>
+      </View>
     </View>
   );
 }

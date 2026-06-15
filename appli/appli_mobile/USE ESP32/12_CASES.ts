@@ -76,7 +76,7 @@ export function useEsp32() {
 
   // REFS POUR CONSERVER LES INSTANCES
   const subscription = useRef<Subscription | null>(null);
-  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Réf pour savoir si le dernier lancer provient d'un bouton précis (1-12) ou du SPIN/BOOT
   const estUnLancerCibleRef = useRef<boolean>(false);

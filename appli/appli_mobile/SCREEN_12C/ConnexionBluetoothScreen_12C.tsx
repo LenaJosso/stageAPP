@@ -5,6 +5,7 @@ import { RootStackParamList } from "../TYPE/type_12C";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
+import { useResponsive } from "../responsive";
 
 export default function ConnexionBluetoothScreen({
   navigation,
@@ -15,6 +16,8 @@ export default function ConnexionBluetoothScreen({
   const { state, scanAndConnect, disconnect, sendPin } = useBleGlobal();
   const [pinInput, setPinInput] = useState("");
   const [enCoursDenvoi, setEnCoursDenvoi] = useState(false);
+
+  const responsive = useResponsive();
 
   const handleValiderPin = async () => {
     if (pinInput.length !== 4 && pinInput.length !== 6) {
@@ -41,14 +44,14 @@ export default function ConnexionBluetoothScreen({
     state.status === "scanning" || enCoursDenvoi;
 
   return (
-      <View style={globalStyles.mainContainer}>
+      <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
 
 
-    <View style={globalStyles.container}>
+    <View style={[globalStyles.container, { padding: responsive.number(16) }]}>
       <GradientText
-                      style={[globalStyles.textDegrade, {marginBottom: 20}]}
-                      text="Connexion à la roue"
-                    />
+            style={[globalStyles.textDegrade, { fontSize: responsive.fontSize(globalStyles.textDegrade.fontSize ?? 16) }]}
+            text="Connexion à la roue"
+            />
       <Text style={globalStyles.status}>État : {state.status}</Text>
       {state.statusText && (
         <Text style={globalStyles.info}>ℹ️ {state.statusText}</Text>
@@ -60,7 +63,7 @@ export default function ConnexionBluetoothScreen({
 
       {/* Bouton de scan visible si déconnecté ou erreur */}
       {(state.status === "idle" || state.status === "error") && (
-        <Pressable style={globalStyles.btn} onPress={scanAndConnect}>
+        <Pressable style={[globalStyles.btn, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]} onPress={scanAndConnect}>
           <Text style={globalStyles.btnText}>
             {state.essaisRestants < 3
               ? "Recommencer (Retenter le PIN)"
@@ -81,7 +84,7 @@ export default function ConnexionBluetoothScreen({
 
       {state.status === "authenticated" && (
         <Pressable
-          style={[globalStyles.btn, globalStyles.btnGray, { marginTop: 20 }]}
+         style={[globalStyles.btn, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]}
           onPress={handleAnnuler}
         >
           <Text style={globalStyles.btnText}>Déconnecter</Text>

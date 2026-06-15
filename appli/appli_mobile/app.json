@@ -3,14 +3,21 @@
     "name": "appli_mobile",
     "slug": "appli_mobile",
     "version": "1.0.0",
+    "orientation": "portrait",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSBluetoothAlwaysUsageDescription": "L'app a besoin du Bluetooth pour détecter les appareils à proximité.",
-        "NSBluetoothPeripheralUsageDescription": "L'app a besoin du Bluetooth pour communiquer avec les appareils.",
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "bundleIdentifier": "stage"
+  "UISupportedInterfaceOrientations": [
+    "UIInterfaceOrientationPortrait"
+  ],
+  "UISupportedInterfaceOrientations~ipad": [
+    "UIInterfaceOrientationPortrait"
+  ],
+  "NSBluetoothAlwaysUsageDescription": "...",
+  "NSBluetoothPeripheralUsageDescription": "...",
+  "ITSAppUsesNonExemptEncryption": false
+},
+      "bundleIdentifier": "com.maepugin.applimobile"
     },
     "android": {
       "permissions": [
@@ -20,7 +27,6 @@
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "minSdkVersion": 24,
       "package": "com.anonymous.appli_mobile"
     },
     "plugins": [

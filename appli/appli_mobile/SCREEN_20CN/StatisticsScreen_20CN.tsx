@@ -6,7 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Buffer } from "buffer";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
-
+import { useResponsive } from "../responsive";
 
 export default function StatisticsScreen({
   navigation,
@@ -17,6 +17,8 @@ export default function StatisticsScreen({
   const [hitsParCase, setHitsParCase] = useState<number[]>(
     new Array(12).fill(0)
   );
+
+  const responsive = useResponsive();
 
   useEffect(() => {
     async function chargerDonnees() {
@@ -50,13 +52,14 @@ export default function StatisticsScreen({
   }, [state.status]);
 
   return (
-<View style={globalStyles.mainContainer}>
+<View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
 
-    <View style={globalStyles.screen}>
-      <GradientText style={globalStyles.textDegrade} text="Statistiques"/>
+    <View style={[globalStyles.screen, { padding: responsive.number(16) }]}>
+      <GradientText style={[globalStyles.textDegrade, { fontSize: responsive.fontSize(globalStyles.textDegrade.fontSize ?? 16) }]}
+       text="Statistiques"/>
       <Text
         style={{
-          fontSize: 22,
+          fontSize: responsive.fontSize(globalStyles.buttonText.fontSize ?? 22),
           fontWeight: "bold",
           marginBottom: 20,
           marginTop:25,
@@ -68,7 +71,7 @@ export default function StatisticsScreen({
 
       <Text
         style={{
-          fontSize: 22,
+          fontSize: responsive.fontSize(globalStyles.buttonText.fontSize ?? 22),
           fontWeight: "600",
           marginBottom: 20,
           color: "#ffffff",
@@ -80,7 +83,7 @@ export default function StatisticsScreen({
       {hitsParCase.map((hits, index) => (
         <Text
           key={index}
-          style={{ fontSize: 20, marginVertical: 4, color: "#ffffff" }}
+          style={{ fontSize: responsive.fontSize(globalStyles.buttonText.fontSize ?? 22), marginVertical: 4, color: "#ffffff" }}
         >
           Case {index + 1} : {hits} hits
         </Text>
@@ -89,3 +92,4 @@ export default function StatisticsScreen({
     </View>
   );
 }
+ 

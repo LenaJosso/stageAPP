@@ -5,18 +5,21 @@ import { useStock } from "./StockContext_20CN";
 import { globalStyles } from "../globalStyles";
 import { RootStackParamList, Lot } from "../TYPE/type_20CN";
 import { GradientText } from "../GradientText";
+import { useResponsive } from "../responsive";
 
 export default function ViewStockScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "ViewStock">): React.JSX.Element {
   const { stocks, deleteLot } = useStock();
-
+  const responsive = useResponsive();
+  
   return (
-<View style={globalStyles.mainContainer}>
+<View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
     
           {/* CONTENU PRINCIPAL (MILIEU) */}
-          <View style={globalStyles.screen}>
-          <GradientText style={globalStyles.textDegrade} text="Liste du Stock"/>
+          <View style={[globalStyles.screen, { padding: responsive.number(16) }]}>
+          <GradientText style={[globalStyles.textDegrade, { fontSize: responsive.fontSize(globalStyles.textDegrade.fontSize ?? 16) }]}
+           text="Liste du Stock"/>
 
       {stocks.length === 0 ? (
         <Text style={globalStyles.emptyText}>
@@ -51,4 +54,3 @@ export default function ViewStockScreen({
     </View>
   );
 }
-
