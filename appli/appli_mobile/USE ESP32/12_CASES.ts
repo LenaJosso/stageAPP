@@ -17,7 +17,13 @@ const HISTORY_CHAR_UUID = "2d3a0008-5a72-4f50-9d9a-8f8c5b6c7e1f";
 const STORAGE_KEY_LAST_DEVICE = "@esp32_last_device_id";
 const STORAGE_KEY_LAST_PIN = "@esp32_last_pin";
 
-const manager = new BleManager();
+//const manager = new BleManager();
+let manager: BleManager | null = null;
+
+function getManager(): BleManager {
+  if (!manager) manager = new BleManager();
+  return manager;
+}
 
 // FONCTION REQUISITION PERMISSIONS
 async function ensurePermissions(): Promise<boolean> {
@@ -138,7 +144,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
 
     scanTimeoutRef.current = setTimeout(() => {
-      manager.stopDeviceScan();
+      getManager().stopDeviceScan();
       setState((s) => ({
         ...s,
         status: "error",
@@ -147,7 +153,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       }));
     }, 20000);
 
-    manager.startDeviceScan(null, null, async (err, device) => {
+    getManager().startDeviceScan(null, null, async (err, device) => {
       if (err) {
         if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
         setState((s) => ({ ...s, status: "error", error: err.message }));
@@ -159,7 +165,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       if (device.name !== "ESP32-Roue") return;
 
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-      manager.stopDeviceScan();
+      getManager().stopDeviceScan();
       setState((s) => ({ ...s, status: "connecting" }));
 
       try {
@@ -201,7 +207,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
           history: [],
         }));
         try {
-          const connected = await manager.connectToDevice(savedDeviceId);
+          const connected = await getManager().connectToDevice(savedDeviceId);
           await setupConnectedDevice(connected);
 
           if (savedPin) {
@@ -352,7 +358,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         subscription.current.remove();
         subscription.current = null;
       }
-      manager.stopDeviceScan();
+      getManager().stopDeviceScan();
 
       try {
         await currentDevice.cancelConnection();

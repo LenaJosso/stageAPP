@@ -4,22 +4,19 @@
     "slug": "appli_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon_lemia_app.png",
+    
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-  "UISupportedInterfaceOrientations": [
-    "UIInterfaceOrientationPortrait"
-  ],
-  "UISupportedInterfaceOrientations~ipad": [
-    "UIInterfaceOrientationPortrait"
-  ],
-  "NSBluetoothAlwaysUsageDescription": "...",
-  "NSBluetoothPeripheralUsageDescription": "...",
-  "ITSAppUsesNonExemptEncryption": false
-},
+        "NSBluetoothAlwaysUsageDescription": "L'app a besoin du Bluetooth pour détecter les appareils à proximité.",
+        "NSBluetoothPeripheralUsageDescription": "L'app a besoin du Bluetooth pour communiquer avec les appareils.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
       "bundleIdentifier": "com.maepugin.applimobile"
     },
     "android": {
+       "icon": "./assets/icon_lemia_app.png",
       "permissions": [
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
@@ -30,6 +27,12 @@
       "package": "com.anonymous.appli_mobile"
     },
     "plugins": [
+      [
+      "expo-screen-orientation",
+      {
+          "initialOrientation": "PORTRAIT"
+        }
+    ],
       [
         "react-native-ble-plx",
         {

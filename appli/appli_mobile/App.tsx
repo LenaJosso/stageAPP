@@ -16,7 +16,8 @@ import AddLotScreen from "./SCREEN_12CN/AddLotScreen_12CN";
 import ViewStockScreen from "./SCREEN_12CN/ViewStockScreen_12CN";
 import ConnexionBluetoothScreen from "./SCREEN_12CN/ConnexionBluetoothScreen_12CN";
 import CommandeScreen from "./COMMANDE ROUE/DouzesCases_Noir";
-import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";*/
+import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";
+import { lockAsync, OrientationLock } from 'expo-screen-orientation'; */
 
 // IMPORT 12 CASES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
@@ -30,7 +31,7 @@ import ViewStockScreen from "./SCREEN_12C/ViewStockScreen_12C";
 import ConnexionBluetoothScreen from "./SCREEN_12C/ConnexionBluetoothScreen_12C";
 import CommandeScreen from "./COMMANDE ROUE/DouzesCases";
 import StatisticsScreen from "./SCREEN_12C/StatisticsScreen_12C";
-
+import { lockAsync, OrientationLock } from 'expo-screen-orientation';
 
 // IMPORT 20 CASES NOIRES
 // A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
@@ -43,11 +44,16 @@ import AddLotScreen from "./SCREEN_20CN/AddLotScreen_20CN";
 import ViewStockScreen from "./SCREEN_20CN/ViewStockScreen_20CN";
 import ConnexionBluetoothScreen from "./SCREEN_20CN/ConnexionBluetoothScreen_20CN";
 import CommandeScreen from "./COMMANDE ROUE/VingtCases_Noir"; 
-import StatisticsScreen from "./SCREEN_20CN/StatisticsScreen_20CN";*/
+import StatisticsScreen from "./SCREEN_20CN/StatisticsScreen_20CN";
+import { lockAsync, OrientationLock } from 'expo-screen-orientation';*/
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-  
+
 export default function App(): React.JSX.Element {
+
+  useEffect(() => {
+    lockAsync(OrientationLock.PORTRAIT_UP);
+  }, []);
 
   return (
     <BleProvider>
@@ -58,7 +64,7 @@ export default function App(): React.JSX.Element {
               initialRouteName="Home"
               screenOptions={{
                 headerStyle: {
-                  backgroundColor: "#000000",
+                  backgroundColor: "#000000", 
                 },
                 headerTitleStyle: {
                   fontWeight: "bold",

@@ -34,7 +34,7 @@ export default function ViewStockScreen({
             <View style={globalStyles.stockItem}>
               <View style={{ flex: 1 }}>
                 <Text style={globalStyles.itemNom}>
-                  {item.nom} (x{item.quantite})
+                  {item.nom} (x{item.quantite}) 
                 </Text>
                 {item.description ? (
                   <Text style={globalStyles.itemDesc}>{item.description}</Text>
