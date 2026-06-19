@@ -23,4 +23,5 @@ export type StockContextType = {
   stocks: Lot[];
   addLot: (newLot: Lot) => void;
   deleteLot: (id: string) => void;
+  removeLotQuantity: (id: string, quantite: number) => void
 };

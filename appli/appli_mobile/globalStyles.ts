@@ -164,7 +164,7 @@ export const globalStyles = StyleSheet.create({
   },
   modalContainer: {
     width: "85%",
-    backgroundColor: "#1e293b", // Fond du modal sombre (anciennement white)
+    backgroundColor: "#303030", // Fond du modal sombre (anciennement white)
     borderRadius: 12,
     padding: 24,
     alignItems: "center",
@@ -190,9 +190,9 @@ export const globalStyles = StyleSheet.create({
     width: "100%",
     letterSpacing: 8,
     textAlign: "center",
-    backgroundColor: "#0f172a", // Fond input PIN sombre (anciennement #f8fafc)
+    backgroundColor: "#404040", // Fond input PIN sombre (anciennement #f8fafc)
     borderWidth: 2,
-    borderColor: "#475569",
+    borderColor: "#424242",
     borderRadius: 8,
     paddingVertical: 12,
     fontSize: 22,
@@ -214,9 +214,9 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "center",
   },
   modalBtnCancel: {
-    backgroundColor: "#334155", // Bouton annuler sombre (anciennement #f1f5f9)
+    backgroundColor: "#404040", // Bouton annuler sombre (anciennement #f1f5f9)
     borderWidth: 1,
-    borderColor: "#475569",
+    borderColor: "#424242",
   },
   modalBtnConfirm: {
     backgroundColor: "#16a34a",
@@ -244,6 +244,7 @@ export const globalStyles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 27.5,
+  
   },
   rowActionGrid: {
     flexDirection: "row",

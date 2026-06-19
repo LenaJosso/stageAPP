@@ -40,7 +40,8 @@ export default function ConnexionBluetoothScreen({
   };
 
   const isModalVisible = state.status === "connected";
-  /* (state.status === "scanning" && state.essaisRestants < 3)*/ const isInterfaceBloquee =
+  /* (state.status === "scanning" && state.essaisRestants < 3)*/ 
+  const isInterfaceBloquee =
     state.status === "scanning" || enCoursDenvoi;
 
   return (

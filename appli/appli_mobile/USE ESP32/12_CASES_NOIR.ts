@@ -197,8 +197,11 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       return;
     }
     try {
+
+
       const savedDeviceId = await AsyncStorage.getItem(STORAGE_KEY_LAST_DEVICE);
-      const savedPin = await AsyncStorage.getItem(STORAGE_KEY_LAST_PIN); // Récupère le PIN sauvé si existant
+      const savedPin = await AsyncStorage.getItem(STORAGE_KEY_LAST_PIN); 
+      // Récupère le PIN sauvé si existant
 
       // Si l'id existe, connexion directe sans passer par un scan global
       if (savedDeviceId) {
@@ -214,7 +217,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
           const connected = await getManager().connectToDevice(savedDeviceId);
           await setupConnectedDevice(connected);
 
-          // AUTO-AUTH : Si le PIN est connu en local, on l'envoie direct en tâche de fond
+          // Si le PIN est connu en local, on l'envoie direct 
           if (savedPin) {
             console.log(
               "[AUTO-AUTH] Clé PIN trouvée en mémoire locale, envoi..."

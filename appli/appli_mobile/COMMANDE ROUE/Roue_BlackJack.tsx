@@ -8,9 +8,11 @@ import {
   Easing,
 } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases_noir";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Roue } from "../Roue";
 import Triangle from "../Triangle";
 import { globalStyles } from "../globalStyles";
+import { useResponsive } from "../responsive";
 
 export default function CommandeScreen(): React.JSX.Element {
   const {
@@ -23,6 +25,8 @@ export default function CommandeScreen(): React.JSX.Element {
   } = useBleGlobal();
 
   const estDesactive = state.status !== "authenticated";
+  const responsive = useResponsive();
+  const insets = useSafeAreaInsets();
 
   const mesQuartiers = [
     { id: "B", label: "Bonus", couleur: "#e5e510", valeur: 1 }, // Index 0
@@ -60,6 +64,8 @@ export default function CommandeScreen(): React.JSX.Element {
     { id: 3, label: "3", couleur: "#ba171c", valeur: 1 },
     { id: 26, label: "26", couleur: "#010102", valeur: 1 },
   ];
+
+  const TAILLE_ROUE = responsive.number(280);
 
   const nbQuartiers = mesQuartiers.length;
   const angleParQuartier = 360 / nbQuartiers;
@@ -144,8 +150,8 @@ export default function CommandeScreen(): React.JSX.Element {
   });
 
   return (
-    <View style={globalStyles.mainContainer}>
-      <View style={globalStyles.leftContainer}>
+    <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
+      <View style={[globalStyles.rightContainer, { padding: responsive.number(16) }]}>
         {estDesactive && (
           <Text
             style={[
@@ -159,7 +165,7 @@ export default function CommandeScreen(): React.JSX.Element {
         )}
 
         <View style={{ marginBottom: 5 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          <Text style={{ fontSize: responsive.fontSize(20), fontWeight: "bold" }}>
             {lotGagnant ? `Résultat : ${lotGagnant}` : "Résultat : "}
           </Text>
         </View>
@@ -170,42 +176,48 @@ export default function CommandeScreen(): React.JSX.Element {
 
         <Animated.View
           style={{
-            marginBottom: 20,
+            marginBottom: responsive.number(20),
             opacity: estDesactive ? 0.5 : 1,
             transform: [{ rotate: rotationInterpolee }],
+            width: TAILLE_ROUE,
+            height: TAILLE_ROUE,
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Roue donnees={mesQuartiers} taille={320} />
+          <Roue donnees={mesQuartiers} taille={TAILLE_ROUE} />
         </Animated.View>
 
         {/* Grilles de boutons */}
-        {[
-          ["B", 32, 15, 28, 4, 21],
-          [9, 25, 17, 27, 13, 30],
-          [8, 23, 10, 5, 24, 0],
-          [16, 11, 1, 20, 14, 31],
-          [2, 22, 18, 29, 7, 19],
-          [12, 6, 3, 26],
-        ].map((row, rIdx) => (
-          <View
-            key={rIdx}
-            style={[
-              globalStyles.rowButtons,
-              { opacity: estDesactive ? 0.5 : 1 },
-            ]}
-          >
-            {row.map((idDuQuartier) => {
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            opacity: estDesactive ? 0.5 : 1,
+            gap: responsive.number(8),
+            marginBottom: responsive.number(10),
+          }}
+        >
+          {[
+            ["B", 0, 1, 2, 3, 4],
+            [5, 6, 7, 8, 9, 10],
+            [11, 12, 13, 14, 15, 16],
+            [17, 18, 19, 20, 21, 22],
+            [23, 24, 25, 26, 27, 28],
+            [29, 30, 31, 32],
+          ].map((row, rIdx) =>
+            row.map((idDuQuartier) => {
               const quartier = mesQuartiers.find((q) => q.id === idDuQuartier);
 
               return (
                 <Pressable
-                  key={idDuQuartier}
+                  key={`${rIdx}-${idDuQuartier}`}
                   disabled={estDesactive}
                   style={[
                     globalStyles.btnCommande,
-                    { backgroundColor: quartier?.couleur || "#ccc" },
+                    {  backgroundColor: quartier?.couleur || "#ccc", borderWidth: 2, borderColor: "#404040" },
                   ]}
-                  // S'il s'agit du bouton Bonus "B", on appelle gererClicBonus, sinon comportement normal
                   onPress={() =>
                     idDuQuartier === "B"
                       ? gererClicBonus()
@@ -215,20 +227,24 @@ export default function CommandeScreen(): React.JSX.Element {
                   <Text style={globalStyles.btnText}>{idDuQuartier}</Text>
                 </Pressable>
               );
-            })}
-          </View>
-        ))}
+            })
+          )}
+        </View>
 
+        {/* Boutons d'action */}
         <View
-          style={[
-            globalStyles.rowActionGrid,
-            { opacity: estDesactive ? 0.5 : 1 },
-          ]}
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            opacity: estDesactive ? 0.5 : 1,
+            gap: responsive.number(8),
+          }}
         >
           <Pressable
             disabled={estDesactive}
             style={globalStyles.btnSpin}
-            onPress={() => gererClicTourner()} // Appelle l'aléatoire sans le bonus
+            onPress={() => gererClicTourner()}
           >
             <Text style={globalStyles.btnText}>SPIN</Text>
           </Pressable>
@@ -249,9 +265,12 @@ export default function CommandeScreen(): React.JSX.Element {
       </View>
 
       {/* Barre d'historique latérale */}
-      <View style={globalStyles.sidebar}>
+      <View style={[
+        globalStyles.customSidebar,
+        { flex: 0.1, paddingBottom: insets.bottom }
+      ]}>
         <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
-        <ScrollView contentContainerStyle={globalStyles.sidebarScroll}>
+        <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
           {state.history.map((idLot, index) => {
             const quartier = mesQuartiers.find((q) => q.id === idLot);
             return (
