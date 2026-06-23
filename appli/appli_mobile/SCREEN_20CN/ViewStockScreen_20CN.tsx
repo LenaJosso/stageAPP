@@ -6,6 +6,7 @@ import { globalStyles } from "../globalStyles";
 import { RootStackParamList, Lot } from "../TYPE/type_20CN";
 import { GradientText } from "../GradientText";
 import { useResponsive } from "../responsive";
+//import
 
 export default function ViewStockScreen({
   navigation,
