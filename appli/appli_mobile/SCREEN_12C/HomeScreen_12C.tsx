@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState} from "react";
 import { View, Text, Pressable, Image } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../TYPE/type_12C";
+import { RootStackParamList } from "../type";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
 import { useResponsive } from "../responsive";

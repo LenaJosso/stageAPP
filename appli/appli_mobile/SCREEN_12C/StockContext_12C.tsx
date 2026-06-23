@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { Lot, StockContextType } from "../TYPE/type_12C";
+import { Lot, StockContextType } from "../type";
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
 

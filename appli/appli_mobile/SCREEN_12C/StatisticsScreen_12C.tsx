@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
-import { RootStackParamList, Lot } from "../TYPE/type_12C";
+import { RootStackParamList, Lot } from "../type";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Buffer } from "buffer";
 import { globalStyles } from "../globalStyles";

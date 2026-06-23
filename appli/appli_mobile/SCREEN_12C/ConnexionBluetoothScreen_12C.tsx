@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Pressable, Modal } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../TYPE/type_12C";
+import { RootStackParamList } from "../type";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";

@@ -1,4 +1,4 @@
-import { useEsp32 } from "../USE ESP32/12_CASES";
+import { useEsp32 } from "./useesp32";
 export type BleContextType = ReturnType<typeof useEsp32>;
 
 export type RootStackParamList = {

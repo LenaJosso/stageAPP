@@ -3,7 +3,7 @@ import { View, Text, FlatList, Pressable, Modal, TextInput } from "react-native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useStock } from "./StockContext_12C";
 import { globalStyles } from "../globalStyles";
-import { RootStackParamList, Lot } from "../TYPE/type_12C";
+import { RootStackParamList, Lot } from "../type";
 import { GradientText } from "../GradientText";
 import { useResponsive } from "../responsive";
 
