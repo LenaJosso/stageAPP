@@ -15,18 +15,18 @@ export default function ConnexionBluetoothScreen({
 >): React.JSX.Element {
   const { state, scanAndConnect, disconnect, sendPin } = useBleGlobal();
   const [pinInput, setPinInput] = useState("");
-  const [enCoursDenvoi, setEnCoursDenvoi] = useState(false);
+  const [beingSent, setBeingSent] = useState(false);
 
   const responsive = useResponsive();
 
-  const handleValiderPin = async () => {
+  const handlePinValidation = async () => {
     if (pinInput.length !== 4 && pinInput.length !== 6) {
       alert("Le code PIN doit comporter 4 ou 6 chiffres.");
       return;
     }
-    setEnCoursDenvoi(true);
+    setBeingSent(true);
     const success = await sendPin(pinInput);
-    setEnCoursDenvoi(false);
+    setBeingSent(false);
 
     if (success) {
       setPinInput("");
@@ -34,7 +34,7 @@ export default function ConnexionBluetoothScreen({
     }
   };
 
-  const handleAnnuler = () => {
+  const handleCancel = () => {
     setPinInput("");
     disconnect();
   };
@@ -42,7 +42,7 @@ export default function ConnexionBluetoothScreen({
   const isModalVisible = state.status === "connected";
   /* (state.status === "scanning" && state.essaisRestants < 3)*/ 
   const isInterfaceBloquee =
-    state.status === "scanning" || enCoursDenvoi;
+    state.status === "scanning" || beingSent;
 
   return (
       <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
@@ -66,7 +66,7 @@ export default function ConnexionBluetoothScreen({
       {(state.status === "idle" || state.status === "error") && (
         <Pressable style={[globalStyles.btn, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]} onPress={scanAndConnect}>
           <Text style={globalStyles.btnText}>
-            {state.essaisRestants < 3
+            {state.remainingTrials < 3
               ? "Recommencer (Retenter le PIN)"
               : "Scanner et connecter"}
           </Text>
@@ -86,7 +86,7 @@ export default function ConnexionBluetoothScreen({
       {state.status === "authenticated" && (
         <Pressable
          style={[globalStyles.btn, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]}
-          onPress={handleAnnuler}
+          onPress={handleCancel}
         >
           <Text style={globalStyles.btnText}>Déconnecter</Text>
         </Pressable>
@@ -121,8 +121,8 @@ export default function ConnexionBluetoothScreen({
             <View style={globalStyles.modalRowButtons}>
               <Pressable
                 style={[globalStyles.modalBtn, globalStyles.modalBtnCancel]}
-                onPress={handleAnnuler}
-                disabled={enCoursDenvoi}
+                onPress={handleCancel}
+                disabled={beingSent}
               >
                 <Text style={globalStyles.modalBtnTextCancel}>Annuler</Text>
               </Pressable>
@@ -133,17 +133,17 @@ export default function ConnexionBluetoothScreen({
                   globalStyles.modalBtnConfirm,
                   isInterfaceBloquee && { opacity: 0.5 },
                 ]}
-                onPress={handleValiderPin}
+                onPress={handlePinValidation}
                 disabled={isInterfaceBloquee}
               >
                 <Text style={globalStyles.btnText}>
-                  {enCoursDenvoi ? "Vérification..." : "Valider"}
+                  {beingSent ? "Vérification..." : "Valider"}
                 </Text>
               </Pressable>
             </View>
 
             <Text style={globalStyles.essaisText}>
-              Tentatives restantes : {state.essaisRestants}
+              Tentatives restantes : {state.remainingTrials}
             </Text>
           </View>
         </View>

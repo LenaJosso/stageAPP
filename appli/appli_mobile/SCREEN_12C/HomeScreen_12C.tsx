@@ -2,12 +2,11 @@ import React from "react";
 import { useEffect, useState} from "react";
 import { View, Text, Pressable, Image } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../TYPE/type_12CN";
+import { RootStackParamList } from "../TYPE/type_12C";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
 import { useResponsive } from "../responsive";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEsp32 } from "../USE ESP32/12_CASES";
 import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_12cases";
 
 

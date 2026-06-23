@@ -1,4 +1,5 @@
 import { useEsp32 } from "../USE ESP32/20_CASES_NOIR";
+
 export type BleContextType = ReturnType<typeof useEsp32>;
 
 export type RootStackParamList = {
@@ -13,9 +14,9 @@ export type RootStackParamList = {
 //Definition lot
 export type Lot = {
   id: string;
-  nom: string;
+  name: string;
   description: string;
-  quantite: number;
+  quantity: number;
 };
 
 //Definition stocks
@@ -23,4 +24,5 @@ export type StockContextType = {
   stocks: Lot[];
   addLot: (newLot: Lot) => void;
   deleteLot: (id: string) => void;
+  removeLotQuantity: (id: string, quantity: number) => void
 };

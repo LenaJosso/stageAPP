@@ -15,9 +15,8 @@ const LOCK_CHAR_UUID = "2d3a0007-5a72-4f50-9d9a-8f8c5b6c7e1f";
 const HISTORY_CHAR_UUID = "2d3a0008-5a72-4f50-9d9a-8f8c5b6c7e1f";
 
 const STORAGE_KEY_LAST_DEVICE = "@esp32_last_device_id";
-const STORAGE_KEY_LAST_PIN = "@esp32_last_pin"; // Nouvelle clé pour stocker le PIN de session
+const STORAGE_KEY_LAST_PIN = "@esp32_last_pin";
 
-//const manager = new BleManager();
 let manager: BleManager | null = null;
 
 function getManager(): BleManager {
@@ -25,6 +24,15 @@ function getManager(): BleManager {
   return manager;
 }
 
+// FIX #1 : flag pour savoir si un scan est actif, évite stopDeviceScan() hors contexte
+let isScanActive = false;
+
+function safeStopScan() {
+  if (isScanActive) {
+    getManager().stopDeviceScan();
+    isScanActive = false;
+  }
+}
 
 // FONCTION REQUISITION PERMISSIONS
 async function ensurePermissions(): Promise<boolean> {
@@ -59,7 +67,7 @@ export type Esp32State = {
   counter: number | null;
   statusText: string | null;
   error: string | null;
-  essaisRestants: number;
+  remainingTrials: number;
   history: number[];
   isLocked: boolean;
   isSpinning: boolean;
@@ -68,14 +76,13 @@ export type Esp32State = {
 };
 
 export function useEsp32() {
-  // - STATE INITIAL DE L'APP
   const [state, setState] = useState<Esp32State>({
     status: "idle",
     device: null,
     counter: null,
     statusText: null,
     error: null,
-    essaisRestants: 3,
+    remainingTrials: 3,
     history: [],
     isLocked: true,
     isSpinning: false,
@@ -83,27 +90,30 @@ export function useEsp32() {
     targetLedIndexGlobal: null,
   });
 
-  // REFS POUR CONSERVER LES INSTANCES
   const subscription = useRef<Subscription | null>(null);
-const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // INDEX DES LEDS ROUGES
-  const listeLedsRouges = [5, 6, 17, 18, 29, 30, 41, 42];
+  // Ref pour accéder à l'état courant depuis les callbacks sans stale closure
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  const redLEDlist = [5, 6, 17, 18, 29, 30, 41, 42];
 
   // HOOK CYCLE DE VIE (CLEANUP)
   useEffect(() => {
     return () => {
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
       if (subscription.current) subscription.current.remove();
-      if (state.device) {
-        state.device.cancelConnection().catch(() => {});
+      safeStopScan();
+      if (stateRef.current.device) {
+        stateRef.current.device.cancelConnection().catch(() => {});
       }
     };
-  }, [state.device]);
+  }, []);
 
-  //     FONCTIONS CONNEXION ET DETECTION (BLE)
-
-  // Configure le tel une fois connecté (MTU, Services, Disconnect handler)
+  // Configure le téléphone une fois connecté (MTU, Services, Disconnect handler)
   const setupConnectedDevice = async (connectedDevice: Device) => {
     if (Platform.OS === "android") {
       await connectedDevice.requestMTU(512).catch(() => {});
@@ -113,6 +123,10 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     await connectedDevice.discoverAllServicesAndCharacteristics();
 
     connectedDevice.onDisconnected(() => {
+      if (subscription.current) {
+        subscription.current.remove();
+        subscription.current = null;
+      }
       setState((s) => ({
         ...s,
         status: "idle",
@@ -142,12 +156,26 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }));
   };
 
-  // Lance le scan physique dans les airs pendant max 20 secondes
+  // FIX #2 : Vérifie que le BLE est allumé avant de lancer un scan
   const executeScanAndConnect = async () => {
+    // Vérification état BLE avant tout scan
+    const bleState = await getManager().state();
+    if (bleState !== "PoweredOn") {
+      setState((s) => ({
+        ...s,
+        status: "error",
+        error: "Bluetooth non disponible. Vérifiez qu'il est activé.",
+        statusText: "Bluetooth désactivé ou non autorisé.",
+      }));
+      return;
+    }
+
+    // Nettoyage d'un éventuel scan précédent
+    safeStopScan();
     if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
 
     scanTimeoutRef.current = setTimeout(() => {
-      getManager().stopDeviceScan();
+      safeStopScan();
       setState((s) => ({
         ...s,
         status: "error",
@@ -156,19 +184,27 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       }));
     }, 20000);
 
-   getManager().startDeviceScan(null, null, async (err, device) => {
+    isScanActive = true;
+    getManager().startDeviceScan(null, null, async (err, device) => {
       if (err) {
+        isScanActive = false;
         if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-        setState((s) => ({ ...s, status: "error", error: err.message }));
+        setState((s) => ({
+          ...s,
+          status: "error",
+          error: err.message,
+          statusText: "Erreur lors du scan BLE.",
+        }));
         return;
       }
 
-      if (device) console.log("Appareil détecté :", device.name, device.id);
       if (!device) return;
       if (device.name !== "ESP32-Roue") return;
 
+      // Appareil trouvé : on stoppe le scan proprement
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-      getManager().stopDeviceScan();
+      safeStopScan();
+
       setState((s) => ({ ...s, status: "connecting" }));
 
       try {
@@ -196,28 +232,25 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       }));
       return;
     }
+
     try {
-
-
       const savedDeviceId = await AsyncStorage.getItem(STORAGE_KEY_LAST_DEVICE);
-      const savedPin = await AsyncStorage.getItem(STORAGE_KEY_LAST_PIN); 
-      // Récupère le PIN sauvé si existant
+      const savedPin = await AsyncStorage.getItem(STORAGE_KEY_LAST_PIN);
 
-      // Si l'id existe, connexion directe sans passer par un scan global
       if (savedDeviceId) {
         setState((s) => ({
           ...s,
           status: "connecting",
           error: null,
-          essaisRestants: 3,
+          remainingTrials: 3,
           statusText: "Connexion directe à l'appareil connu...",
           history: [],
         }));
+
         try {
           const connected = await getManager().connectToDevice(savedDeviceId);
           await setupConnectedDevice(connected);
 
-          // Si le PIN est connu en local, on l'envoie direct 
           if (savedPin) {
             console.log(
               "[AUTO-AUTH] Clé PIN trouvée en mémoire locale, envoi..."
@@ -230,6 +263,9 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
             "Échec direct connect, bascule sur recherche standard...",
             directConnectError
           );
+
+          // FIX #3 : délai de stabilisation avant de relancer un scan
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
@@ -237,7 +273,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         ...s,
         status: "scanning",
         error: null,
-        essaisRestants: 3,
+        remainingTrials: 3,
         statusText: "Recherche globale de l'appareil...",
         history: [],
       }));
@@ -253,7 +289,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     pinStr: string,
     targetedDevice?: Device
   ): Promise<boolean> => {
-    const currentDevice = targetedDevice || state.device;
+    const currentDevice = targetedDevice || stateRef.current.device;
 
     if (!currentDevice) {
       setState((s) => ({
@@ -287,7 +323,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       );
       const bytes = Buffer.from(c.value ?? "", "base64");
       const count = bytes[0];
-      const historiqueInitial = Array.from(
+      const defaultHistory = Array.from(
         { length: count },
         (_, i) => bytes[1 + i]
       );
@@ -299,7 +335,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       const initialLockState =
         Buffer.from(lockChar.value ?? "", "base64")[0] === 0;
 
-      // BRANCHE L'ÉCOUTEUR DE RECEPTION (Bouton BOOT)
+      // Branche l'écouteur de réception (Bouton BOOT)
       subscription.current = currentDevice.monitorCharacteristicForService(
         SERVICE_UUID,
         RESULT_CHAR_UUID,
@@ -309,18 +345,18 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
           const bytesNotify = Buffer.from(characteristic.value, "base64");
           const counter = bytesNotify.readUInt8(0);
 
-          const ledsDuQuartier = [0, 1, 2, 3].map((idx) => counter * 4 + idx);
-          const ledsAutorisees = ledsDuQuartier.filter(
-            (led) => !listeLedsRouges.includes(led)
+          const ledsQuarter = [0, 1, 2, 3].map((idx) => counter * 4 + idx);
+          const ledsAllowed = ledsQuarter.filter(
+            (led) => !redLEDlist.includes(led)
           );
-          const ledChoisie =
-            ledsAutorisees[Math.floor(Math.random() * ledsAutorisees.length)];
+          const chosenLed =
+            ledsAllowed[Math.floor(Math.random() * ledsAllowed.length)];
 
           setState((s) => ({
             ...s,
             isSpinning: true,
             pendingCounter: counter,
-            targetLedIndexGlobal: ledChoisie,
+            targetLedIndexGlobal: chosenLed,
             isLocked: true,
           }));
 
@@ -330,7 +366,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         }
       );
 
-      // SAUVEGARDE : L'authentification a réussi, on enregistre le PIN pour les prochaines sessions
+      // Sauvegarde du PIN si l'auth a réussi
       await AsyncStorage.setItem(STORAGE_KEY_LAST_PIN, pinStr).catch((e) =>
         console.error("Échec de la sauvegarde locale du PIN", e)
       );
@@ -341,35 +377,37 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         device: currentDevice,
         statusText: "Authentifié avec succès",
         error: null,
-        history: historiqueInitial,
+        history: defaultHistory,
         isLocked: initialLockState,
       }));
 
       return true;
     } catch (e: any) {
       console.error("Erreur d'authentification PIN capturée : ", e);
-      const nouveauxEssais = state.essaisRestants - 1;
+      const newTrials = stateRef.current.remainingTrials - 1;
 
+      // Nettoyage de l'abonnement actif
       if (subscription.current) {
         subscription.current.remove();
         subscription.current = null;
       }
-     getManager().stopDeviceScan();
 
       try {
         await currentDevice.cancelConnection();
-      } catch (cancelErr) {}
+      } catch (cancelErr) {
+        // Connexion peut-être déjà fermée, on ignore
+      }
 
-      // NETTOYAGE : Si le PIN stocké échoue (ex: PIN modifié côté ESP32), on le supprime pour éviter de boucler sur l'erreur
+      // Supprime le PIN stocké en cas d'échec (ex: PIN modifié côté ESP32)
       await AsyncStorage.removeItem(STORAGE_KEY_LAST_PIN).catch(() => {});
 
-      if (nouveauxEssais <= 0) {
+      if (newTrials <= 0) {
         setState((s) => ({
           ...s,
           status: "error",
           device: null,
           counter: null,
-          essaisRestants: 0,
+          remainingTrials: 0,
           statusText: "Sécurité activée : Appareil verrouillé",
           error: "Sécurité : 3 tentatives incorrectes. Connexion coupée.",
           history: [],
@@ -379,8 +417,8 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         setState((s) => ({
           ...s,
           status: "connected",
-          essaisRestants: nouveauxEssais,
-          error: `PIN incorrect (${nouveauxEssais} essais restants)`,
+          remainingTrials: newTrials,
+          error: `PIN incorrect (${newTrials} essais restants)`,
           statusText: "Veuillez réessayer.",
           isLocked: true,
         }));
@@ -395,8 +433,9 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       subscription.current.remove();
       subscription.current = null;
     }
-    if (state.device) {
-      await state.device.cancelConnection().catch(() => {});
+    safeStopScan();
+    if (stateRef.current.device) {
+      await stateRef.current.device.cancelConnection().catch(() => {});
     }
 
     setState((s) => ({
@@ -405,7 +444,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       device: null,
       counter: null,
       statusText: "Déconnecté manuellement",
-      essaisRestants: 3,
+      remainingTrials: 3,
       error: null,
       history: [],
       isLocked: true,
@@ -421,12 +460,11 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     await AsyncStorage.removeItem(STORAGE_KEY_LAST_PIN).catch(() => {});
   };
 
-  // ==========================================
-  //     FONCTIONS D'ACTION SUR LA ROUE
-  // ==========================================
+  // FONCTIONS D'ACTION SUR LA ROUE
 
-  const tournerRoue = async (targetIndex?: number): Promise<boolean> => {
-    if (!state.device || state.status !== "authenticated") {
+  const spinWheel = async (targetIndex?: number): Promise<boolean> => {
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated") {
       setState((s) => ({
         ...s,
         error: "Action impossible : Authentification requise.",
@@ -439,7 +477,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       const buf = Buffer.from([byteValue]);
       const payload = buf.toString("base64");
 
-      await state.device.writeCharacteristicWithResponseForService(
+      await currentDevice.writeCharacteristicWithResponseForService(
         SERVICE_UUID,
         SPIN_CHAR_UUID,
         payload
@@ -455,34 +493,34 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const finAnimationRoue = () => {
+  const endWheelAnimation = () => {
     setState((s) => {
-      let nouvelHistorique =
+      let newHistory =
         s.pendingCounter !== null
           ? [...s.history, s.pendingCounter]
           : s.history;
-      if (nouvelHistorique.length > 20) {
-        nouvelHistorique = nouvelHistorique.slice(-20);
+      if (newHistory.length > 20) {
+        newHistory = newHistory.slice(-20);
       }
       return {
         ...s,
         isSpinning: false,
         counter: s.pendingCounter,
-        history: nouvelHistorique,
+        history: newHistory,
         pendingCounter: null,
         targetLedIndexGlobal: null,
       };
     });
   };
 
-  // ==========================================
-  //        FONCTIONS GESTION DES VERROUS
-  // ==========================================
+  // FONCTIONS GESTION DES VERROUS
 
   const refreshLock = async (): Promise<boolean> => {
-    if (!state.device || state.status !== "authenticated") return true;
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated")
+      return true;
     try {
-      const c = await state.device.readCharacteristicForService(
+      const c = await currentDevice.readCharacteristicForService(
         SERVICE_UUID,
         LOCK_CHAR_UUID
       );
@@ -491,14 +529,15 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       return isLocked;
     } catch (e) {
       console.error("Erreur lors de la lecture du LOCK :", e);
-      return state.isLocked;
+      return stateRef.current.isLocked;
     }
   };
 
   const unlock = async () => {
-    if (!state.device || state.status !== "authenticated") return;
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated") return;
     try {
-      await state.device.writeCharacteristicWithResponseForService(
+      await currentDevice.writeCharacteristicWithResponseForService(
         SERVICE_UUID,
         LOCK_CHAR_UUID,
         Buffer.from([1]).toString("base64")
@@ -510,9 +549,10 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   };
 
   const lock = async () => {
-    if (!state.device || state.status !== "authenticated") return;
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated") return;
     try {
-      await state.device.writeCharacteristicWithResponseForService(
+      await currentDevice.writeCharacteristicWithResponseForService(
         SERVICE_UUID,
         LOCK_CHAR_UUID,
         Buffer.from([0]).toString("base64")
@@ -523,10 +563,12 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const recupererHistorique = async (): Promise<number[]> => {
-    if (!state.device || state.status !== "authenticated") return [];
+  const retrieveHistory = async (): Promise<number[]> => {
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated")
+      return [];
     try {
-      const c = await state.device.readCharacteristicForService(
+      const c = await currentDevice.readCharacteristicForService(
         SERVICE_UUID,
         HISTORY_CHAR_UUID
       );
@@ -538,16 +580,18 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       return history;
     } catch (e) {
       console.error("Erreur historique:", e);
-      return state.history;
+      return stateRef.current.history;
     }
   };
 
-  const lireCaracteristique = async (
+  const readCharacteristic = async (
     characteristicUuid: string
   ): Promise<string | null> => {
-    if (!state.device || state.status !== "authenticated") return null;
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated")
+      return null;
     try {
-      const characteristic = await state.device.readCharacteristicForService(
+      const characteristic = await currentDevice.readCharacteristicForService(
         SERVICE_UUID,
         characteristicUuid
       );
@@ -564,13 +608,13 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     disconnect,
     forgetDevice,
     sendPin,
-    tournerRoue,
-    lireCaracteristique,
-    recupererHistorique,
+    spinWheel,
+    readCharacteristic,
+    retrieveHistory,
     unlock,
     lock,
     refreshLock,
-    finAnimationRoue,
+    endWheelAnimation,
     STATS_CHAR_UUID,
     INFO_CHAR_UUID,
   };

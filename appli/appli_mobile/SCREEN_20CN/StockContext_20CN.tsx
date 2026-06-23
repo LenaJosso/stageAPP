@@ -3,29 +3,25 @@ import { Lot, StockContextType } from "../TYPE/type_20CN";
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
 
-export const StockProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [stocks, setStocks] = useState<Lot[]>([]);
-//verifie si il y a un ancien lot identique
+
   const addLot = (newLot: Lot) => {
     setStocks((prevStocks) => {
       const existingIndex = prevStocks.findIndex(
         (lot) =>
-          lot.nom.trim().toLowerCase() === newLot.nom.trim().toLowerCase() &&
+          lot.name.trim().toLowerCase() === newLot.name.trim().toLowerCase() &&
           (lot.description ?? "").trim().toLowerCase() ===
             (newLot.description ?? "").trim().toLowerCase()
       );
-//si meme lot, ils fusionnent
       if (existingIndex !== -1) {
         const updated = [...prevStocks];
         updated[existingIndex] = {
           ...updated[existingIndex],
-          quantite: updated[existingIndex].quantite + newLot.quantite,
+          quantity: updated[existingIndex].quantity + newLot.quantity,
         };
         return updated;
       }
-
       return [...prevStocks, newLot];
     });
   };
@@ -34,8 +30,21 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({
     setStocks((prevStocks) => prevStocks.filter((lot) => lot.id !== id));
   };
 
+  // retire N unités, supprime le lot si quantité tombe à 0
+  const removeLotQuantity = (id: string, quantityToRemove: number) => {
+    setStocks((prevStocks) =>
+      prevStocks
+        .map((lot) =>
+          lot.id === id
+            ? { ...lot, quantite: lot.quantity - quantityToRemove }
+            : lot
+        )
+        .filter((lot) => lot.quantity > 0)
+    );
+  };
+
   return (
-    <StockContext.Provider value={{ stocks, addLot, deleteLot }}>
+    <StockContext.Provider value={{ stocks, addLot, deleteLot, removeLotQuantity }}>
       {children}
     </StockContext.Provider>
   );

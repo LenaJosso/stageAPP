@@ -24,7 +24,14 @@ function getManager(): BleManager {
   if (!manager) manager = new BleManager();
   return manager;
 }
+let isScanActive = false;
 
+function safeStopScan() {
+  if (isScanActive) {
+    getManager().stopDeviceScan();
+    isScanActive = false;
+  }
+}
 
 // FONCTION REQUISITION PERMISSIONS
 async function ensurePermissions(): Promise<boolean> {
@@ -59,7 +66,7 @@ export type Esp32State = {
   counter: number | null;
   statusText: string | null;
   error: string | null;
-  essaisRestants: number;
+  remainingTrials: number;
   history: number[];
   isLocked: boolean;
   isSpinning: boolean;
@@ -75,7 +82,7 @@ export function useEsp32() {
     counter: null,
     statusText: null,
     error: null,
-    essaisRestants: 3,
+    remainingTrials: 3,
     history: [],
     isLocked: true,
     isSpinning: false,
@@ -87,8 +94,13 @@ export function useEsp32() {
   const subscription = useRef<Subscription | null>(null);
 const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
   // INDEX DES LEDS ROUGES
-  const listeLedsRouges = [7, 22, 37, 52];
+  const redLEDlist = [7, 22, 37, 52];
 
   // HOOK CYCLE DE VIE (CLEANUP)
   useEffect(() => {
@@ -99,7 +111,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         state.device.cancelConnection().catch(() => {});
       }
     };
-  }, [state.device]);
+  }, []);
 
   //     FONCTIONS CONNEXION ET DETECTION (BLE)
 
@@ -113,6 +125,10 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     await connectedDevice.discoverAllServicesAndCharacteristics();
 
     connectedDevice.onDisconnected(() => {
+      if (subscription.current) {
+        subscription.current.remove();
+        subscription.current = null;
+      }
       setState((s) => ({
         ...s,
         status: "idle",
@@ -142,12 +158,26 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }));
   };
 
-  // Lance le scan physique dans les airs pendant max 20 secondes
+  // FIX #2 : Vérifie que le BLE est allumé avant de lancer un scan
   const executeScanAndConnect = async () => {
+    // Vérification état BLE avant tout scan
+    const bleState = await getManager().state();
+    if (bleState !== "PoweredOn") {
+      setState((s) => ({
+        ...s,
+        status: "error",
+        error: "Bluetooth non disponible. Vérifiez qu'il est activé.",
+        statusText: "Bluetooth désactivé ou non autorisé.",
+      }));
+      return;
+    }
+
+    // Nettoyage d'un éventuel scan précédent
+    safeStopScan();
     if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
 
     scanTimeoutRef.current = setTimeout(() => {
-     getManager().stopDeviceScan();
+      safeStopScan();
       setState((s) => ({
         ...s,
         status: "error",
@@ -156,19 +186,27 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       }));
     }, 20000);
 
-   getManager().startDeviceScan(null, null, async (err, device) => {
+    isScanActive = true;
+    getManager().startDeviceScan(null, null, async (err, device) => {
       if (err) {
+        isScanActive = false;
         if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-        setState((s) => ({ ...s, status: "error", error: err.message }));
+        setState((s) => ({
+          ...s,
+          status: "error",
+          error: err.message,
+          statusText: "Erreur lors du scan BLE.",
+        }));
         return;
       }
 
-      if (device) console.log("Appareil détecté :", device.name, device.id);
       if (!device) return;
       if (device.name !== "ESP32-Roue") return;
 
+      // Appareil trouvé : on stoppe le scan proprement
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-    getManager().stopDeviceScan();
+      safeStopScan();
+
       setState((s) => ({ ...s, status: "connecting" }));
 
       try {
@@ -185,7 +223,6 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       }
     });
   };
-
   // Point d'entrée principal au clic sur "Connecter"
   const scanAndConnect = async () => {
     if (!(await ensurePermissions())) {
@@ -227,6 +264,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
             "Échec direct connect, bascule sur recherche standard...",
             directConnectError
           );
+           await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
@@ -325,24 +363,24 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
             }
 
             // Calcul de secours pour un spin classique
-            const ledsDuQuartier = [0, 1, 2].map((idx) => counter * 3 + idx);
-            const ledsAutorisees = ledsDuQuartier.filter(
-              (led) => !listeLedsRouges.includes(led)
+            const ledsQuarter = [0, 1, 2].map((idx) => counter * 3 + idx);
+            const ledsAllowed = ledsQuarter.filter(
+              (led) => !redLEDlist.includes(led)
             );
 
             // Sécurité si toutes les leds du quartier étaient filtrées
-            const ledChoisie =
-              ledsAutorisees.length > 0
-                ? ledsAutorisees[
-                    Math.floor(Math.random() * ledsAutorisees.length)
+            const chosenLed =
+              ledsAllowed.length > 0
+                ? ledsAllowed[
+                    Math.floor(Math.random() * ledsAllowed.length)
                   ]
-                : ledsDuQuartier[0];
+                : ledsAllowed[0];
 
             return {
               ...s,
               isSpinning: true,
               pendingCounter: counter,
-              targetLedIndexGlobal: ledChoisie,
+              targetLedIndexGlobal: chosenLed,
               isLocked: true,
             };
           });
@@ -371,13 +409,13 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       return true;
     } catch (e: any) {
       console.error("Erreur d'authentification PIN capturée : ", e);
-      const nouveauxEssais = state.essaisRestants - 1;
+      const newTrials = state.remainingTrials - 1;
 
       if (subscription.current) {
         subscription.current.remove();
         subscription.current = null;
       }
-      getManager().stopDeviceScan();
+      
 
       try {
         await currentDevice.cancelConnection();
@@ -386,7 +424,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       // NETTOYAGE : Si le PIN stocké échoue (ex: PIN modifié côté ESP32), on le supprime pour éviter de boucler sur l'erreur
       await AsyncStorage.removeItem(STORAGE_KEY_LAST_PIN).catch(() => {});
 
-      if (nouveauxEssais <= 0) {
+      if (newTrials <= 0) {
         setState((s) => ({
           ...s,
           status: "error",
@@ -402,8 +440,8 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         setState((s) => ({
           ...s,
           status: "connected",
-          essaisRestants: nouveauxEssais,
-          error: `PIN incorrect (${nouveauxEssais} essais restants)`,
+          essaisRestants: newTrials,
+          error: `PIN incorrect (${newTrials} essais restants)`,
           statusText: "Veuillez réessayer.",
           isLocked: true,
         }));
@@ -418,8 +456,9 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       subscription.current.remove();
       subscription.current = null;
     }
-    if (state.device) {
-      await state.device.cancelConnection().catch(() => {});
+    safeStopScan();
+    if (stateRef.current.device) {
+      await stateRef.current.device.cancelConnection().catch(() => {});
     }
 
     setState((s) => ({
@@ -448,7 +487,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   //     FONCTIONS D'ACTION SUR LA ROUE
   // ==========================================
 
-  const tournerRoue = async (targetIndex?: number): Promise<boolean> => {
+  const spinWheel = async (targetIndex?: number): Promise<boolean> => {
     if (!state.device || state.status !== "authenticated") {
       setState((s) => ({
         ...s,
@@ -478,7 +517,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const finAnimationRoue = () => {
+  const endWheelAnimation = () => {
     setState((s) => {
       let nouvelHistorique =
         s.pendingCounter !== null
@@ -498,9 +537,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     });
   };
 
-  // ==========================================
   //        FONCTIONS GESTION DES VERROUS
-  // ==========================================
 
   const refreshLock = async (): Promise<boolean> => {
     if (!state.device || state.status !== "authenticated") return true;
@@ -546,7 +583,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const recupererHistorique = async (): Promise<number[]> => {
+  const retrieveHistory = async (): Promise<number[]> => {
     if (!state.device || state.status !== "authenticated") return [];
     try {
       const c = await state.device.readCharacteristicForService(
@@ -565,12 +602,14 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const lireCaracteristique = async (
+  const readCharacteristic = async (
     characteristicUuid: string
   ): Promise<string | null> => {
-    if (!state.device || state.status !== "authenticated") return null;
+    const currentDevice = stateRef.current.device;
+    if (!currentDevice || stateRef.current.status !== "authenticated")
+      return null;
     try {
-      const characteristic = await state.device.readCharacteristicForService(
+      const characteristic = await currentDevice.readCharacteristicForService(
         SERVICE_UUID,
         characteristicUuid
       );
@@ -587,13 +626,13 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     disconnect,
     forgetDevice,
     sendPin,
-    tournerRoue,
-    lireCaracteristique,
-    recupererHistorique,
+    spinWheel,
+    readCharacteristic,
+    retrieveHistory,
     unlock,
     lock,
     refreshLock,
-    finAnimationRoue,
+    endWheelAnimation,
     STATS_CHAR_UUID,
     INFO_CHAR_UUID,
   };

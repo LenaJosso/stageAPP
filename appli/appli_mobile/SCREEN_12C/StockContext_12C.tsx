@@ -10,7 +10,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setStocks((prevStocks) => {
       const existingIndex = prevStocks.findIndex(
         (lot) =>
-          lot.nom.trim().toLowerCase() === newLot.nom.trim().toLowerCase() &&
+          lot.name.trim().toLowerCase() === newLot.name.trim().toLowerCase() &&
           (lot.description ?? "").trim().toLowerCase() ===
             (newLot.description ?? "").trim().toLowerCase()
       );
@@ -18,7 +18,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const updated = [...prevStocks];
         updated[existingIndex] = {
           ...updated[existingIndex],
-          quantite: updated[existingIndex].quantite + newLot.quantite,
+          quantity: updated[existingIndex].quantity + newLot.quantity,
         };
         return updated;
       }
@@ -30,16 +30,16 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setStocks((prevStocks) => prevStocks.filter((lot) => lot.id !== id));
   };
 
-  // ✅ Nouveau : retire N unités, supprime le lot si quantité tombe à 0
-  const removeLotQuantity = (id: string, quantiteARetirer: number) => {
+  //retire N unités, supprime le lot si quantité tombe à 0
+  const removeLotQuantity = (id: string, quantityToRemove: number) => {
     setStocks((prevStocks) =>
       prevStocks
         .map((lot) =>
           lot.id === id
-            ? { ...lot, quantite: lot.quantite - quantiteARetirer }
+            ? { ...lot, quantite: lot.quantity -quantityToRemove }
             : lot
         )
-        .filter((lot) => lot.quantite > 0)
+        .filter((lot) => lot.quantity > 0)
     );
   };
 

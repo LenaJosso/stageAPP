@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import { useEsp32 } from "../USE ESP32/20_CASES_NOIR"; // A CHANGER SI ON CHANGE DE ROUE
+import { useEsp32 } from "../USE ESP32/20_CASES_NOIR"; 
 import { BleContextType } from "../TYPE/type_20CN";
 
 const BleContext = createContext<BleContextType | undefined>(undefined);

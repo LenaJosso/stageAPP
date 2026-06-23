@@ -17,19 +17,19 @@ import { useResponsive } from "../responsive";
 export default function CommandeScreen(): React.JSX.Element {
   const {
     state,
-    tournerRoue,
+    spinWheel,
     unlock,
     lock,
-    finAnimationRoue,
-    recupererHistorique,
+    endWheelAnimation,
+    retrieveHistory,
   } = useBleGlobal();
 
-  const estDesactive = state.status !== "authenticated";
+  const isDisasbled = state.status !== "authenticated";
 
   const responsive = useResponsive();
 
 
-  const mesQuartiers = [
+  const myQuarters = [
     { id: 0, label: "1", couleur: "#ed178a", valeur: 1 },
     { id: 1, label: "2", couleur: "#f7ec13", valeur: 1 },
     { id: 2, label: "3", couleur: "#ed1e24", valeur: 1 },
@@ -55,101 +55,101 @@ export default function CommandeScreen(): React.JSX.Element {
 
     const insets = useSafeAreaInsets();
     
-  const TAILLE_ROUE = responsive.number(280);
-  const RAYON_LEDS = responsive.number(130);
-  const nbQuartiers = mesQuartiers.length;
-  const angleParQuartier = 360 / nbQuartiers;
+  const WheelSize = responsive.number(280);
+  const LedRadius = responsive.number(130);
+  const nbQuarter = myQuarters.length;
+  const anglePerQuarter = 360 / nbQuarter;
 
   const rotationAnim = useRef(new Animated.Value(0)).current;
-  const dernierIndexRef = useRef<number | null>(null);
+  const lastIndexRef = useRef<number | null>(null);
 
   // Référence pour mémoriser la LED ciblée localement dès le clic
-  const ledCibleLocaleRef = useRef<number | null>(null);
+  const targetLedRef = useRef<number | null>(null);
 
-  const [lotGagnant, setLotGagnant] = useState<string | null>(null);
-  const [isGrosLot, setGrosLot] = useState(false);
+  const [winningPrize, setWinningPrize] = useState<string | null>(null);
+  const [isJackpot, setJackpot] = useState(false);
   const [isBankrupt, setIsBankrupt] = useState(false);
 
-  const listeLedsRouges = [7, 22, 37, 52];
-  const listeLedsBankrupt = [6, 8, 21, 23, 36, 38, 51, 53];
+  const redLedList = [7, 22, 37, 52];
+  const bankruptLedList = [6, 8, 21, 23, 36, 38, 51, 53];
 
-  const gererClicTourner = (indexQuartier?: number) => {
-    setLotGagnant(null);
+  const manageClickTurn = (indexQuartier?: number) => {
+    setWinningPrize(null);
 
     if (indexQuartier !== undefined) {
       // Clic sur un bouton de couleur
-      const ledInterne = Math.floor(Math.random() * 3);
-      const ledGlobale = indexQuartier * 3 + ledInterne;
+      const internalLed = Math.floor(Math.random() * 3);
+      const globalLed = indexQuartier * 3 + internalLed;
 
-      ledCibleLocaleRef.current = ledGlobale; // <-- Sauvegarde locale
+      targetLedRef.current = globalLed; // <-- Sauvegarde locale
 
       if (state.targetLedIndexGlobal !== undefined) {
-        state.targetLedIndexGlobal = ledGlobale;
+        state.targetLedIndexGlobal = globalLed;
       }
-      tournerRoue(indexQuartier);
+      spinWheel(indexQuartier);
     } else {
       // Clic sur SPIN (Aléatoire complet SAUF les 8 leds rouges des gros lots)
-      const toutesLesLeds = Array.from(
-        { length: nbQuartiers * 3 },
+      const allLed = Array.from(
+        { length: nbQuarter * 3 },
         (_, i) => i
       );
-      const ledsAutorisees = toutesLesLeds.filter(
-        (led) => !listeLedsRouges.includes(led)
+      const ledsAllowed = allLed.filter(
+        (led) => !redLedList.includes(led)
       );
 
-      const ledGlobaleChoisie =
-        ledsAutorisees[Math.floor(Math.random() * ledsAutorisees.length)];
-      const qIdx = Math.floor(ledGlobaleChoisie / 3);
+      const globalLedChosen =
+        ledsAllowed[Math.floor(Math.random() * ledsAllowed.length)];
+      const qIdx = Math.floor(globalLedChosen / 3);
 
-      ledCibleLocaleRef.current = ledGlobaleChoisie; // <-- Sauvegarde locale
+      targetLedRef.current =globalLedChosen; // <-- Sauvegarde locale
 
       if (state.targetLedIndexGlobal !== undefined) {
-        state.targetLedIndexGlobal = ledGlobaleChoisie;
+        state.targetLedIndexGlobal = globalLedChosen;
       }
-      tournerRoue(qIdx);
+      spinWheel(qIdx);
     }
   };
-  const gererClicLock = async () => {
+  const manageClickLock = async () => {
     if (state.isLocked) await unlock();
     else await lock();
   };
 
-  const gererGrosLot = () => {
-    if (estDesactive || state.isSpinning || isGrosLot) return;
-    setLotGagnant(null);
-    setGrosLot(true);
+  const manageJackpot = () => {
+    if (isDisasbled || state.isSpinning || isJackpot) return;
+    setWinningPrize(null);
+    setJackpot(true);
 
-    const ledGrosLot =
-      listeLedsRouges[Math.floor(Math.random() * listeLedsRouges.length)];
-    const qIdx = Math.floor(ledGrosLot / 3);
+    const ledJackpot =
+      redLedList[Math.floor(Math.random() * redLedList.length)];
+    const qIdx = Math.floor(ledJackpot / 3);
 
-    ledCibleLocaleRef.current = ledGrosLot; // <-- Sauvegarde locale forcée sur la LED ROUGE
+    targetLedRef.current = ledJackpot; // <-- Sauvegarde locale forcée sur la LED ROUGE
 
     if (state.targetLedIndexGlobal !== undefined) {
-      state.targetLedIndexGlobal = ledGrosLot;
+      state.targetLedIndexGlobal = ledJackpot;
     }
-    tournerRoue(qIdx);
+    spinWheel(qIdx);
   };
 
-  const gererBankrupt = () => {
-    if (estDesactive || state.isSpinning || isBankrupt) return;
-    setLotGagnant(null);
+  const manageBankrupt = () => {
+    if (isDisasbled || state.isSpinning || isBankrupt) return;
+    setWinningPrize(null);
     setIsBankrupt(true);
 
-    const ledNoireChoisie =
-      listeLedsBankrupt[Math.floor(Math.random() * listeLedsBankrupt.length)];
-    const qIdx = Math.floor(ledNoireChoisie / 3);
+    const blackLedChosen =
+      bankruptLedList[Math.floor(Math.random() * bankruptLedList.length)];
+    const qIdx = Math.floor(blackLedChosen / 3);
 
-    ledCibleLocaleRef.current = ledNoireChoisie; // <-- Sauvegarde locale forcée sur la LED NOIRE
+    targetLedRef.current = blackLedChosen; // <-- Sauvegarde locale forcée sur la LED NOIRE
 
     if (state.targetLedIndexGlobal !== undefined) {
-      state.targetLedIndexGlobal = ledNoireChoisie;
+      state.targetLedIndexGlobal = blackLedChosen;
     }
-    tournerRoue(qIdx);
+    spinWheel(qIdx);
   };
 
   useEffect(() => {
-    if (state.status === "authenticated") recupererHistorique();
+    if (state.status === "authenticated") retrieveHistory();
   }, [state.status]);
 
   // GESTION DE L'ANIMATION PRINCIPALE
@@ -158,95 +158,95 @@ export default function CommandeScreen(): React.JSX.Element {
       state.isSpinning &&
       state.pendingCounter !== null &&
       state.pendingCounter >= 0 &&
-      state.pendingCounter < nbQuartiers
+      state.pendingCounter < nbQuarter
     ) {
-      const cibleActuelle = state.pendingCounter;
-      const toursBonus = 360 * 4;
+      const currentTarget = state.pendingCounter;
+      const bonusRound = 360 * 4;
 
       // On utilise la LED locale en priorité, sinon le state global
-      const ledAViser =
-        ledCibleLocaleRef.current !== null
-          ? ledCibleLocaleRef.current
+      const ledToAim =
+        targetLedRef.current !== null
+          ? targetLedRef.current
           : state.targetLedIndexGlobal;
 
-      let angleLedCible = 0;
+      let targetLedAngle = 0;
       if (
-        ledAViser !== null &&
-        ledAViser !== undefined &&
-        Math.floor(ledAViser / 3) === cibleActuelle
+        ledToAim !== null &&
+        ledToAim !== undefined &&
+        Math.floor(ledToAim / 3) === currentTarget
       ) {
-        const ledIdx = ledAViser % 3;
-        const espacementLed = angleParQuartier / 4;
-        angleLedCible =
-          cibleActuelle * angleParQuartier + (ledIdx + 1) * espacementLed;
+        const ledIdx = ledToAim % 3;
+        const spacingLed = anglePerQuarter / 4;
+        targetLedAngle =
+          currentTarget * anglePerQuarter + (ledIdx + 1) * spacingLed;
       } else {
-        angleLedCible = cibleActuelle * angleParQuartier + angleParQuartier / 2;
+        targetLedAngle = currentTarget * anglePerQuarter + anglePerQuarter / 2;
       }
 
-      const angleCible = toursBonus - angleLedCible;
+      const targetAngle = bonusRound - targetLedAngle;
 
-      if (dernierIndexRef.current !== null) {
-        const valeurActuelle =
+      if (lastIndexRef.current !== null) {
+        const currentValue =
           (rotationAnim as any)._value !== undefined
             ? (rotationAnim as any)._value
             : 0;
 
-        const anglePrecedentStatique = valeurActuelle % 360;
-        rotationAnim.setValue(anglePrecedentStatique);
+        const previousStaticAngle = currentValue % 360;
+        rotationAnim.setValue(previousStaticAngle);
       } else {
         rotationAnim.setValue(0);
       }
 
-      dernierIndexRef.current = cibleActuelle;
+      lastIndexRef.current = currentTarget;
 
       Animated.timing(rotationAnim, {
-        toValue: angleCible,
+        toValue: targetAngle,
         duration: 3500,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start(() => {
         // Détermination précise basée sur la LED finale visée
-        const ledFinale =
-          ledCibleLocaleRef.current !== null
-            ? ledCibleLocaleRef.current
+        const finalLed =
+          targetLedRef.current !== null
+            ? targetLedRef.current
             : state.targetLedIndexGlobal;
 
         if (
-          ledFinale !== null &&
-          ledFinale !== undefined &&
-          listeLedsBankrupt.includes(ledFinale)
+          finalLed !== null &&
+          finalLed !== undefined &&
+          bankruptLedList.includes(finalLed)
         ) {
-          setLotGagnant("BANKRUPT");
+          setWinningPrize("BANKRUPT");
         } else if (
-          ledFinale !== null &&
-          ledFinale !== undefined &&
-          listeLedsRouges.includes(ledFinale)
+          finalLed !== null &&
+          finalLed !== undefined &&
+          redLedList.includes(finalLed)
         ) {
-          setLotGagnant("Gros Lot");
-        } else if (mesQuartiers[cibleActuelle]) {
-          setLotGagnant(mesQuartiers[cibleActuelle].label);
+          setWinningPrize("Gros Lot");
+        } else if (myQuarters[currentTarget]) {
+          setWinningPrize(myQuarters[currentTarget].label);
         }
 
-        finAnimationRoue();
-        setGrosLot(false);
+        endWheelAnimation();
+        setJackpot(false);
         setIsBankrupt(false);
-        ledCibleLocaleRef.current = null; // Reset pour le prochain tour
+        targetLedRef.current = null; // Reset pour le prochain tour
       });
     }
   }, [state.isSpinning, state.pendingCounter, state.targetLedIndexGlobal]);
 
-  const rotationInterpolee = rotationAnim.interpolate({
+  const interpoledRotation = rotationAnim.interpolate({
     inputRange: [-360, 10000],
     outputRange: ["-360deg", "10000deg"],
   });
 
-  const afficherEnRouge =
-    lotGagnant === "Gros Lot" || lotGagnant === "BANKRUPT";
+  const displayInRed =
+    winningPrize === "Gros Lot" || winningPrize === "BANKRUPT";
 
   return (
     <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
           <View style={[globalStyles.rightContainer, { padding: responsive.number(16) }]}>
-        {estDesactive && (
+        {isDisasbled && (
           <Text
             style={[
               globalStyles.error,
@@ -263,10 +263,10 @@ export default function CommandeScreen(): React.JSX.Element {
             style={{
               fontSize: responsive.fontSize(20),
               fontWeight: "bold",
-              color: afficherEnRouge ? "#dc2626" : "#000",
+              color: displayInRed ? "#dc2626" : "#000",
             }}
           >
-            {lotGagnant ? `Résultat : ${lotGagnant}` : "Résultat : "}
+            {winningPrize ? `Résultat : ${winningPrize}` : "Résultat : "}
           </Text>
         </View>
 
@@ -277,29 +277,29 @@ export default function CommandeScreen(): React.JSX.Element {
         <Animated.View
           style={{
             marginBottom: responsive.number(30),
-            opacity: estDesactive ? 0.5 : 1,
-            transform: [{ rotate: rotationInterpolee }],
-            width: TAILLE_ROUE,
-            height: TAILLE_ROUE,
+            opacity: isDisasbled ? 0.5 : 1,
+            transform: [{ rotate: interpoledRotation }],
+            width: WheelSize,
+            height: WheelSize,
             justifyContent: "center",
             alignItems: "center",
           }}
         >
-          <Roue donnees={mesQuartiers} taille={TAILLE_ROUE} />
+          <Roue donnees={myQuarters} taille={WheelSize} />
 
-          {mesQuartiers.map((quartier, qIdx) => {
-            const angleBaseQuartier = qIdx * angleParQuartier;
+          {myQuarters.map((quartier, qIdx) => {
+            const defaultAngleQuarter = qIdx * anglePerQuarter;
             return [0, 1, 2].map((ledIdx) => {
-              const espacementLed = angleParQuartier / 4;
-              const angleLed = angleBaseQuartier + (ledIdx + 1) * espacementLed;
-              const indexGlobal = qIdx * 3 + ledIdx;
+              const spacingLed = anglePerQuarter / 4;
+              const angleLed = defaultAngleQuarter + (ledIdx + 1) *spacingLed;
+              const globalIndex = qIdx * 3 + ledIdx;
 
-              const estRougeGrosLot = listeLedsRouges.includes(indexGlobal);
-              const estNoireBankrupt = listeLedsBankrupt.includes(indexGlobal);
+              const isRedJackpot = redLedList.includes(globalIndex);
+              const isBlackBankrupt = bankruptLedList.includes(globalIndex);
 
               let couleurLed = "#a3a3a3";
-              if (estRougeGrosLot) couleurLed = "#AB1616";
-              if (estNoireBankrupt) couleurLed = "#000000";
+              if (isRedJackpot) couleurLed = "#AB1616";
+              if (isBlackBankrupt) couleurLed = "#000000";
 
               return (
                 <View
@@ -309,7 +309,7 @@ export default function CommandeScreen(): React.JSX.Element {
                     {
                       transform: [
                         { rotate: `${angleLed}deg` },
-                        { translateY: -RAYON_LEDS },
+                        { translateY: -LedRadius },
                       ],
                     },
                   ]}
@@ -334,20 +334,20 @@ export default function CommandeScreen(): React.JSX.Element {
                     flexDirection: "row",
                     flexWrap: "wrap",
                     justifyContent: "center",
-                    opacity: estDesactive ? 0.5 : 1,
+                    opacity: isDisasbled ? 0.5 : 1,
                     gap: responsive.number(8),
                     marginBottom: responsive.number(10),
                   }}
                 >
-                  {mesQuartiers.map((quartier, idx) => (
+                  {myQuarters.map((quartier, idx) => (
                     <Pressable
                       key={idx}
-                      disabled={estDesactive}
+                      disabled={isDisasbled}
                       style={[
                         globalStyles.btnCommande,
                         { backgroundColor: quartier.couleur },
                       ]}
-                      onPress={() => gererClicTourner(idx)}
+                      onPress={() => manageClickTurn(idx)}
                     >
                       <Text style={globalStyles.btnText}>{idx + 1}</Text>
                     </Pressable>
@@ -360,24 +360,24 @@ export default function CommandeScreen(): React.JSX.Element {
                     flexDirection: "row",
                     flexWrap: "wrap",
                     justifyContent: "center",
-                    opacity: estDesactive ? 0.5 : 1,
+                    opacity: isDisasbled ? 0.5 : 1,
                     gap: responsive.number(8),
                   }}
                 >
                   <Pressable
-                    disabled={estDesactive}
+                    disabled={isDisasbled}
                     style={globalStyles.btnSpin}
-                    onPress={() => gererClicTourner()}
+                    onPress={() => manageClickTurn()}
                   >
                     <Text style={globalStyles.btnText}>SPIN</Text>
                   </Pressable>
                   <Pressable
-                    disabled={estDesactive}
+                    disabled={isDisasbled}
                     style={[
                       globalStyles.btnSpin,
                       !state.isLocked && { backgroundColor: "#16a34a" },
                     ]}
-                    onPress={gererClicLock}
+                    onPress={manageClickLock}
                   >
                     <Text style={[globalStyles.btnText, { textAlign: "center" }]}>
                       {state.isLocked ? "Déverrouiller" : "Verrouiller"}
@@ -387,7 +387,7 @@ export default function CommandeScreen(): React.JSX.Element {
                   {/* BOUTON BANKRUPT */}
                   <Pressable
                     disabled={
-                      estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                      isDisasbled || state.isSpinning || isJackpot || isBankrupt
                     }
                     style={[
                       globalStyles.btnSpin,
@@ -396,12 +396,12 @@ export default function CommandeScreen(): React.JSX.Element {
                         borderWidth: 2,
                         borderColor: "#000000",
                         opacity:
-                          estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                          isDisasbled || state.isSpinning || isJackpot || isBankrupt
                             ? 0.4
                             : 1,
                       },
                     ]}
-                    onPress={gererBankrupt}
+                    onPress={manageBankrupt}
                   >
                     <Text
                       style={[
@@ -416,7 +416,7 @@ export default function CommandeScreen(): React.JSX.Element {
                   {/* BOUTON GROS LOT */}
                   <Pressable
                     disabled={
-                      estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                      isDisasbled || state.isSpinning || isJackpot || isBankrupt
                     }
                     style={[
                       globalStyles.btnSpin,
@@ -425,12 +425,12 @@ export default function CommandeScreen(): React.JSX.Element {
                         borderWidth: 2,
                         borderColor: "#dc2626",
                         opacity:
-                          estDesactive || state.isSpinning || isGrosLot || isBankrupt
+                         isDisasbled || state.isSpinning || isJackpot || isBankrupt
                             ? 0.4
                             : 1,
                       },
                     ]}
-                    onPress={gererGrosLot}
+                    onPress={manageJackpot}
                   >
                     <Text
                       style={[
@@ -452,7 +452,7 @@ export default function CommandeScreen(): React.JSX.Element {
                 <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
                 <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
                   {state.history.map((idLot, index) => {
-                    const quartier = mesQuartiers.find((q) => q.id === idLot);
+                    const quarter = myQuarters.find((q) => q.id === idLot);
                     return (
                       <View key={index} style={globalStyles.historyItem}>
                         <Text style={globalStyles.historyIndex}>{index + 1}.</Text>
@@ -461,13 +461,13 @@ export default function CommandeScreen(): React.JSX.Element {
                             width: 12,
                             height: 12,
                             borderRadius: 6,
-                            backgroundColor: quartier?.couleur || "#ccc",
+                            backgroundColor: quarter?.couleur || "#ccc",
                             marginRight: 8,
                             alignSelf: "center",
                           }}
                         />
                         <Text style={globalStyles.historyText}>
-                          {quartier ? quartier.label : `Lot Inconnu (${idLot})`}
+                          {quarter ? quarter.label : `Lot Inconnu (${idLot})`}
                         </Text>
                       </View>
                     );

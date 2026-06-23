@@ -17,18 +17,18 @@ import { useResponsive } from "../responsive";
 export default function CommandeScreen(): React.JSX.Element {
   const {
     state,
-    tournerRoue,
+    spinWheel,
     unlock,
     lock,
-    finAnimationRoue,
-    recupererHistorique,
+    endWheelAnimation,
+    retrieveHistory,
   } = useBleGlobal();
 
-  const estDesactive = state.status !== "authenticated";
+  const isDisasbled = state.status !== "authenticated";
 
   const responsive = useResponsive();
 
-  const mesQuartiers = [
+  const myQuarters = [
     { id: 0, label: "Lot 1", couleur: "#02b801", valeur: 1 },
     { id: 1, label: "Gros Lot", couleur: "#ff0000", valeur: 1 },
     { id: 2, label: "Lot 3", couleur: "#e6b6ff", valeur: 1 },
@@ -43,22 +43,22 @@ export default function CommandeScreen(): React.JSX.Element {
     { id: 11, label: "Lot 12", couleur: "#87ea71", valeur: 1 },
   ];
 
-  const nbQuartiers = mesQuartiers.length;
-  const angleParQuartier = 360 / nbQuartiers;
+  const nbQuarters = myQuarters.length;
+  const anglePerQuarter = 360 / nbQuarters;
   const rotationAnim = useRef(new Animated.Value(0)).current;
-  const dernierIndexRef = useRef<number | null>(null);
-  const [lotGagnant, setLotGagnant] = useState<string | null>(null);
+  const lastIndexRef = useRef<number | null>(null);
+  const [winningPrize, setWinningPrize] = useState<string | null>(null);
 
   const insets = useSafeAreaInsets();
 
-  const TAILLE_ROUE = responsive.number(320);
+  const WheelSize = responsive.number(320);
 
-  const gererClicTourner = (index?: number) => {
-    setLotGagnant(null);
-    tournerRoue(index);
+  const manageClickTurn = (index?: number) => {
+    setWinningPrize(null);
+    spinWheel(index);
   };
 
-  const gererClicLock = async () => {
+  const manageClickLock = async () => {
     if (state.isLocked) {
       await unlock();
     } else {
@@ -68,7 +68,7 @@ export default function CommandeScreen(): React.JSX.Element {
 
   useEffect(() => {
     if (state.status === "authenticated") {
-      recupererHistorique();
+      retrieveHistory();
     }
   }, [state.status]);
 
@@ -77,34 +77,34 @@ export default function CommandeScreen(): React.JSX.Element {
       state.isSpinning &&
       state.pendingCounter !== null &&
       state.pendingCounter >= 0 &&
-      state.pendingCounter < nbQuartiers
+      state.pendingCounter < nbQuarters
     ) {
-      const cibleActuelle = state.pendingCounter;
-      const toursBonus = 360 * 4;
-      const decalageCentre = angleParQuartier / 2;
-      const angleCible =
-        toursBonus - cibleActuelle * angleParQuartier - decalageCentre;
+      const currentTarget = state.pendingCounter;
+      const bonusRound = 360 * 4;
+      const centerGap = anglePerQuarter / 2;
+      const targetAngle =
+        bonusRound - currentTarget * anglePerQuarter - centerGap;
 
-      if (dernierIndexRef.current !== null) {
+      if (lastIndexRef.current !== null) {
         const anglePrecedentStatique =
-          -(dernierIndexRef.current * angleParQuartier) - decalageCentre;
+          -(lastIndexRef.current * anglePerQuarter) - centerGap;
         rotationAnim.setValue(anglePrecedentStatique);
       } else {
         rotationAnim.setValue(0);
       }
 
-      dernierIndexRef.current = cibleActuelle;
+      lastIndexRef.current = currentTarget;
 
       Animated.timing(rotationAnim, {
-        toValue: angleCible,
+        toValue: targetAngle,
         duration: 3500,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start(() => {
-        if (mesQuartiers[cibleActuelle]) {
-          setLotGagnant(mesQuartiers[cibleActuelle].label);
+        if (myQuarters[currentTarget]) {
+          setWinningPrize(myQuarters[currentTarget].label);
         }
-        finAnimationRoue();
+        endWheelAnimation();
       });
     }
   }, [state.isSpinning, state.pendingCounter]);
@@ -117,7 +117,7 @@ export default function CommandeScreen(): React.JSX.Element {
   return (
     <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
       <View style={[globalStyles.rightContainer, { padding: responsive.number(16) }]}>
-        {estDesactive && (
+        {isDisasbled && (
           <Text
             style={[
               globalStyles.error,
@@ -131,7 +131,7 @@ export default function CommandeScreen(): React.JSX.Element {
 
         <View style={{ marginBottom: 5 }}>
           <Text style={{ fontSize: responsive.fontSize(20), fontWeight: "bold" }}>
-            {lotGagnant ? `Résultat : ${lotGagnant}` : "Résultat : "}
+            {winningPrize ? `Résultat : ${winningPrize}` : "Résultat : "}
           </Text>
         </View>
 
@@ -142,11 +142,11 @@ export default function CommandeScreen(): React.JSX.Element {
         <Animated.View
           style={{
             marginBottom: responsive.number(30),
-            opacity: estDesactive ? 0.5 : 1,
+            opacity: isDisasbled ? 0.5 : 1,
             transform: [{ rotate: rotationInterpolee }],
           }}
         >
-          <Roue donnees={mesQuartiers} taille={TAILLE_ROUE} />
+          <Roue donnees={myQuarters} taille={WheelSize} />
         </Animated.View>
 
         {/* Grille de boutons numérotés - flexWrap pour passer à la ligne si manque de place */}
@@ -155,20 +155,20 @@ export default function CommandeScreen(): React.JSX.Element {
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "center",
-            opacity: estDesactive ? 0.5 : 1,
+            opacity: isDisasbled ? 0.5 : 1,
             gap: responsive.number(8),
             marginBottom: responsive.number(10),
           }}
         >
-          {mesQuartiers.map((quartier, idx) => (
+          {myQuarters.map((quartier, idx) => (
             <Pressable
               key={idx}
-              disabled={estDesactive}
+              disabled={isDisasbled}
               style={[
                 globalStyles.btnCommande,
                 { backgroundColor: quartier.couleur },
               ]}
-              onPress={() => gererClicTourner(idx)}
+              onPress={() => manageClickTurn(idx)}
             >
               <Text style={globalStyles.btnText}>{idx + 1}</Text>
             </Pressable>
@@ -181,25 +181,25 @@ export default function CommandeScreen(): React.JSX.Element {
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "center",
-            opacity: estDesactive ? 0.5 : 1,
+            opacity: isDisasbled ? 0.5 : 1,
             gap: responsive.number(8),
           }}
         >
           <Pressable
-            disabled={estDesactive}
+            disabled={isDisasbled}
             style={globalStyles.btnSpin}
-            onPress={() => gererClicTourner()}
+            onPress={() => manageClickTurn()}
           >
             <Text style={globalStyles.btnText}>SPIN</Text>
           </Pressable>
 
           <Pressable
-            disabled={estDesactive}
+            disabled={isDisasbled}
             style={[
               globalStyles.btnSpin,
               !state.isLocked && { backgroundColor: "#16a34a" },
             ]}
-            onPress={gererClicLock}
+            onPress={manageClickLock}
           >
             <Text style={[globalStyles.btnText, { textAlign: "center" }]}>
               {state.isLocked ? "Déverrouiller" : "Verrouiller"}
@@ -216,7 +216,7 @@ export default function CommandeScreen(): React.JSX.Element {
         <Text style={globalStyles.sidebarTitle}>Historique (ESP32)</Text>
         <ScrollView horizontal={true} contentContainerStyle={globalStyles.sidebarScroll}>
           {state.history.map((idLot, index) => {
-            const quartier = mesQuartiers.find((q) => q.id === idLot);
+            const quarter = myQuarters.find((q) => q.id === idLot);
             return (
               <View key={index} style={globalStyles.historyItem}>
                 <Text style={globalStyles.historyIndex}>{index + 1}.</Text>
@@ -225,13 +225,13 @@ export default function CommandeScreen(): React.JSX.Element {
                     width: 12,
                     height: 12,
                     borderRadius: 6,
-                    backgroundColor: quartier?.couleur || "#ccc",
+                    backgroundColor: quarter?.couleur || "#ccc",
                     marginRight: 8,
                     alignSelf: "center",
                   }}
                 />
                 <Text style={globalStyles.historyText}>
-                  {quartier ? quartier.label : `Lot Inconnu (${idLot})`}
+                  {quarter ? quarter.label : `Lot Inconnu (${idLot})`}
                 </Text>
               </View>
             );

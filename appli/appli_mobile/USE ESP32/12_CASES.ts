@@ -25,6 +25,16 @@ function getManager(): BleManager {
   return manager;
 }
 
+let isScanActive = false;
+
+function safeStopScan() {
+  if (isScanActive) {
+    getManager().stopDeviceScan();
+    isScanActive = false;
+  }
+}
+
+
 // FONCTION REQUISITION PERMISSIONS
 async function ensurePermissions(): Promise<boolean> {
   if (Platform.OS !== "android") return true;
@@ -58,7 +68,7 @@ export type Esp32State = {
   counter: number | null;
   statusText: string | null;
   error: string | null;
-  essaisRestants: number;
+  remainingTrials: number;
   history: number[];
   isLocked: boolean;
   isSpinning: boolean;
@@ -73,7 +83,7 @@ export function useEsp32() {
     counter: null,
     statusText: null,
     error: null,
-    essaisRestants: 3,
+    remainingTrials: 3,
     history: [],
     isLocked: true,
     isSpinning: false,
@@ -85,10 +95,15 @@ export function useEsp32() {
 const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Réf pour savoir si le dernier lancer provient d'un bouton précis (1-12) ou du SPIN/BOOT
-  const estUnLancerCibleRef = useRef<boolean>(false);
+  const isLaunchedTarget = useRef<boolean>(false);
+    // Ref pour accéder à l'état courant depuis les callbacks sans stale closure
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // INDEX DES QUARTIERS ROUGES (Basé sur mesQuartiers de DouzesCases.tsx : Lot 2, Lot 5, Lot 8, Lot 11)
-  const listeIndexRouges = [1, 4, 7, 10];
+  const redINDEXlist = [1, 4, 7, 10];
 
   // HOOK CYCLE DE VIE (CLEANUP)
   useEffect(() => {
@@ -139,8 +154,21 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }));
   };
 
-  // Lance le scan physique dans les airs pendant max 20 secondes
   const executeScanAndConnect = async () => {
+    // Vérification état BLE avant tout scan
+    const bleState = await getManager().state();
+    if (bleState !== "PoweredOn") {
+      setState((s) => ({
+        ...s,
+        status: "error",
+        error: "Bluetooth non disponible. Vérifiez qu'il est activé.",
+        statusText: "Bluetooth désactivé ou non autorisé.",
+      }));
+      return;
+    }
+
+    // Nettoyage d'un éventuel scan précédent
+    safeStopScan();
     if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
 
     scanTimeoutRef.current = setTimeout(() => {
@@ -155,17 +183,24 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     getManager().startDeviceScan(null, null, async (err, device) => {
       if (err) {
+        isScanActive = false;
         if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-        setState((s) => ({ ...s, status: "error", error: err.message }));
+        setState((s) => ({
+          ...s,
+          status: "error",
+          error: err.message,
+          statusText: "Erreur lors du scan BLE.",
+        }));
         return;
       }
 
-      if (device) console.log("Appareil détecté :", device.name, device.id);
       if (!device) return;
       if (device.name !== "ESP32-Roue") return;
 
+      // Appareil trouvé : on stoppe le scan proprement
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-      getManager().stopDeviceScan();
+      safeStopScan();
+
       setState((s) => ({ ...s, status: "connecting" }));
 
       try {
@@ -222,6 +257,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
             "Échec direct connect, bascule sur recherche standard...",
             directConnectError
           );
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
@@ -279,7 +315,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       );
       const bytes = Buffer.from(c.value ?? "", "base64");
       const count = bytes[0];
-      const historiqueInitial = Array.from(
+      const defaultHistory = Array.from(
         { length: count },
         (_, i) => bytes[1 + i]
       );
@@ -299,35 +335,35 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
           if (e || !characteristic?.value) return;
 
           const bytesNotify = Buffer.from(characteristic.value, "base64");
-          let caseGagnante = bytesNotify.readUInt8(0);
+          let winningCase = bytesNotify.readUInt8(0);
 
           // APPLICATION DE LA CONDITION DE SÉCURITÉ
           // Si ce n'est pas un lancer ciblé (donc SPIN ou bouton BOOT physique) ET que c'est une case rouge
           if (
-            !estUnLancerCibleRef.current &&
-            listeIndexRouges.includes(caseGagnante)
+            !isLaunchedTarget.current &&
+            redINDEXlist.includes(winningCase)
           ) {
             console.log(
               `[RÈGLE ROUGE] Lancer aléatoire tombé sur la case rouge ${
-                caseGagnante + 1
+                winningCase + 1
               }. Décalage forcé.`
             );
 
             // On décale d'une case vers l'avant jusqu'à tomber sur une case non rouge
-            while (listeIndexRouges.includes(caseGagnante)) {
-              caseGagnante = (caseGagnante + 1) % 12;
+            while (redINDEXlist.includes(winningCase)) {
+              winningCase = (winningCase + 1) % 12;
             }
           }
 
           setState((s) => ({
             ...s,
             isSpinning: true,
-            pendingCounter: caseGagnante,
+            pendingCounter: winningCase,
             isLocked: true,
           }));
 
           // Reset du flag pour le prochain coup (par défaut, le bouton BOOT physique est considéré comme aléatoire)
-          estUnLancerCibleRef.current = false;
+         isLaunchedTarget.current = false;
 
           setTimeout(() => {
             refreshLock();
@@ -345,20 +381,20 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         device: currentDevice,
         statusText: "Authentifié avec succès",
         error: null,
-        history: historiqueInitial,
+        history: defaultHistory,
         isLocked: initialLockState,
       }));
 
       return true;
     } catch (e: any) {
       console.error("Erreur d'authentification PIN capturée : ", e);
-      const nouveauxEssais = state.essaisRestants - 1;
+      const newTrials = state.remainingTrials - 1;
 
       if (subscription.current) {
         subscription.current.remove();
         subscription.current = null;
       }
-      getManager().stopDeviceScan();
+      
 
       try {
         await currentDevice.cancelConnection();
@@ -366,13 +402,13 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
       await AsyncStorage.removeItem(STORAGE_KEY_LAST_PIN).catch(() => {});
 
-      if (nouveauxEssais <= 0) {
+      if (newTrials <= 0) {
         setState((s) => ({
           ...s,
           status: "error",
           device: null,
           counter: null,
-          essaisRestants: 0,
+          remainingTrials: 0,
           statusText: "Sécurité activée : Appareil verrouillé",
           error: "Sécurité : 3 tentatives incorrectes. Connexion coupée.",
           history: [],
@@ -382,8 +418,8 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
         setState((s) => ({
           ...s,
           status: "connected",
-          essaisRestants: nouveauxEssais,
-          error: `PIN incorrect (${nouveauxEssais} essais restants)`,
+          remainingTrials: newTrials ,
+          error: `PIN incorrect (${newTrials } essais restants)`,
           statusText: "Veuillez réessayer.",
           isLocked: true,
         }));
@@ -397,8 +433,9 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       subscription.current.remove();
       subscription.current = null;
     }
-    if (state.device) {
-      await state.device.cancelConnection().catch(() => {});
+   safeStopScan();
+    if (stateRef.current.device) {
+      await stateRef.current.device.cancelConnection().catch(() => {});
     }
 
     setState((s) => ({
@@ -422,7 +459,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   };
 
   // ACTION SUR LA ROUE
-  const tournerRoue = async (targetIndex?: number): Promise<boolean> => {
+  const spinWheel = async (targetIndex?: number): Promise<boolean> => {
     if (!state.device || state.status !== "authenticated") {
       setState((s) => ({
         ...s,
@@ -432,7 +469,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
 
     // Si targetIndex est défini, l'utilisateur a pressé un bouton de 1 à 12
-    estUnLancerCibleRef.current = targetIndex !== undefined;
+    isLaunchedTarget.current = targetIndex !== undefined;
 
     try {
       const byteValue = targetIndex !== undefined ? targetIndex : 0xff;
@@ -455,7 +492,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const finAnimationRoue = () => {
+  const endWheelAnimation = () => {
     setState((s) => {
       let nouvelHistorique =
         s.pendingCounter !== null
@@ -476,20 +513,23 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // GESTION DES VERROUS
   const refreshLock = async (): Promise<boolean> => {
-    if (!state.device || state.status !== "authenticated") return true;
-    try {
-      const c = await state.device.readCharacteristicForService(
-        SERVICE_UUID,
-        LOCK_CHAR_UUID
-      );
-      const isLocked = Buffer.from(c.value ?? "", "base64")[0] === 0;
-      setState((s) => ({ ...s, isLocked }));
-      return isLocked;
-    } catch (e) {
-      console.error("Erreur lors de la lecture du LOCK :", e);
-      return state.isLocked;
-    }
-  };
+ const currentDevice = stateRef.current.device;
+     if (!currentDevice || stateRef.current.status !== "authenticated")
+       return true;
+     try {
+       const c = await currentDevice.readCharacteristicForService(
+         SERVICE_UUID,
+         LOCK_CHAR_UUID
+       );
+       const isLocked = Buffer.from(c.value ?? "", "base64")[0] === 0;
+       setState((s) => ({ ...s, isLocked }));
+       return isLocked;
+     } catch (e) {
+       console.error("Erreur lors de la lecture du LOCK :", e);
+       return stateRef.current.isLocked;
+     }
+   };
+ 
 
   const unlock = async () => {
     if (!state.device || state.status !== "authenticated") return;
@@ -519,7 +559,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const recupererHistorique = async (): Promise<number[]> => {
+  const retrieveHistory = async (): Promise<number[]> => {
     if (!state.device || state.status !== "authenticated") return [];
     try {
       const c = await state.device.readCharacteristicForService(
@@ -538,7 +578,7 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     }
   };
 
-  const lireCaracteristique = async (
+  const readCharacteristic = async (
     characteristicUuid: string
   ): Promise<string | null> => {
     if (!state.device || state.status !== "authenticated") return null;
@@ -560,13 +600,13 @@ const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     disconnect,
     forgetDevice,
     sendPin,
-    tournerRoue,
-    lireCaracteristique,
-    recupererHistorique,
+    spinWheel,
+    readCharacteristic,
+    retrieveHistory,
     unlock,
     lock,
     refreshLock,
-    finAnimationRoue,
+    endWheelAnimation,
     STATS_CHAR_UUID,
     INFO_CHAR_UUID,
   };

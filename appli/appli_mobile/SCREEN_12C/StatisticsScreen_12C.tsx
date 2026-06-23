@@ -11,34 +11,34 @@ import { useResponsive } from "../responsive";
 export default function StatisticsScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "Statistics">): React.JSX.Element {
-  const { state, lireCaracteristique, STATS_CHAR_UUID, INFO_CHAR_UUID } =
+  const { state, readCharacteristic, STATS_CHAR_UUID, INFO_CHAR_UUID } =
     useBleGlobal();
   const [totalSpins, setTotalSpins] = useState<number>(0);
-  const [hitsParCase, setHitsParCase] = useState<number[]>(
+  const [hitsPerCase, setHitsPerCase] = useState<number[]>(
     new Array(12).fill(0)
   );
 
   const responsive = useResponsive();
 
   useEffect(() => {
-    async function chargerDonnees() {
+    async function loadData() {
       if (state.status !== "authenticated") return;
 
       try {
-        const base64Info = await lireCaracteristique(INFO_CHAR_UUID);
+        const base64Info = await readCharacteristic(INFO_CHAR_UUID);
         if (base64Info) {
           const bytesInfo = Buffer.from(base64Info, "base64");
           const total = bytesInfo.readUInt32LE(2);
           setTotalSpins(total);
         }
 
-        const base64Stats = await lireCaracteristique(STATS_CHAR_UUID);
+        const base64Stats = await readCharacteristic(STATS_CHAR_UUID);
         if (base64Stats) {
           const bytesStats = Buffer.from(base64Stats, "base64");
           const hits = Array.from({ length: 12 }, (_, i) =>
             bytesStats.readUInt16LE(i * 2)
           );
-          setHitsParCase(hits);
+          setHitsPerCase(hits);
         }
       } catch (error) {
         console.error(
@@ -48,7 +48,7 @@ export default function StatisticsScreen({
       }
     }
 
-    chargerDonnees();
+    loadData();
   }, [state.status]);
 
   return (
@@ -80,7 +80,7 @@ export default function StatisticsScreen({
         Statistiques par case :
       </Text>
 
-      {hitsParCase.map((hits, index) => (
+      {hitsPerCase.map((hits, index) => (
         <Text
           key={index}
           style={{ fontSize: responsive.fontSize(globalStyles.buttonText.fontSize ?? 22), marginVertical: 4, color: "#ffffff" }}

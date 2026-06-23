@@ -11,22 +11,22 @@ export default function AddLotScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "AddLot">): React.JSX.Element {
   const { addLot } = useStock();
-  const [nom, setNom] = useState("");
+  const [name, setNom] = useState("");
   const [description, setDescription] = useState("");
-  const [quantite, setQuantite] = useState("");
+  const [quantity, setQuantite] = useState("");
 
   const responsive = useResponsive();
 
   const handleValidation = () => {
-    if (!nom || !quantite) {
+    if (!name || !quantity) {
       alert("Veuillez remplir au moins le nom et la quantité.");
       return;
     }
     const newLot: Lot = {
       id: Date.now().toString(),
-      nom,
+      name,
       description,
-      quantite: parseInt(quantite, 10),
+      quantity: parseInt(quantity, 10),
     };
     addLot(newLot);
     navigation.goBack();
@@ -54,7 +54,7 @@ export default function AddLotScreen({
           ]}
           placeholder="Nom du produit"
           placeholderTextColor="#ffffff"
-          value={nom}
+          value={name}
           onChangeText={setNom}
         />
         <TextInput
@@ -82,7 +82,7 @@ export default function AddLotScreen({
           ]}
           placeholder="Quantité"
           placeholderTextColor="#ffffff"
-          value={quantite}
+          value={quantity}
           onChangeText={(text) => setQuantite(text.replace(/[^0-9]/g, ""))}
           keyboardType="numeric"
         />

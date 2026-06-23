@@ -14,35 +14,35 @@ export default function ViewStockScreen({
   const responsive = useResponsive();
 
   const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
-  const [quantiteARetirer, setQuantiteARetirer] = useState("1");
+  const [quantityToRemove, setquantityToRemove] = useState("1");
 
-  const ouvrirModal = (lot: Lot) => {
+  const openModal = (lot: Lot) => {
     setSelectedLot(lot);
-    setQuantiteARetirer("1"); // reset à 1 à chaque ouverture
+    setquantityToRemove("1"); // reset à 1 à chaque ouverture
   };
 
-  const fermerModal = () => {
+  const closeModal = () => {
     setSelectedLot(null);
-    setQuantiteARetirer("1");
+    setquantityToRemove("1");
   };
 
-  const handleConfirmer = () => {
+  const handleConfirmation = () => {
     if (!selectedLot) return;
 
-    const quantite = parseInt(quantiteARetirer, 10);
+    const quantity = parseInt(quantityToRemove, 10);
 
-    if (isNaN(quantite) || quantite <= 0) return; // valeur invalide
-    if (quantite > selectedLot.quantite) return;   // on ne peut pas retirer plus que le stock
+    if (isNaN(quantity) || quantity <= 0) return; // valeur invalide
+    if (quantity > selectedLot.quantity) return;   // on ne peut pas retirer plus que le stock
 
-    removeLotQuantity(selectedLot.id, quantite);
-    fermerModal();
+    removeLotQuantity(selectedLot.id, quantity);
+    closeModal();
   };
 
-  const quantiteSaisie = parseInt(quantiteARetirer, 10);
-  const saisieInvalide =
-    isNaN(quantiteSaisie) ||
-    quantiteSaisie <= 0 ||
-    (selectedLot !== null && quantiteSaisie > selectedLot.quantite);
+  const quantityEntry = parseInt(quantityToRemove, 10);
+  const invalidEntry =
+    isNaN(quantityEntry) ||
+    quantityEntry <= 0 ||
+    (selectedLot !== null && quantityEntry > selectedLot.quantity);
 
   return (
     <View style={[globalStyles.mainContainer, { flex: 1, flexDirection: "column", justifyContent: "space-between" }]}>
@@ -63,7 +63,7 @@ export default function ViewStockScreen({
               <View style={globalStyles.stockItem}>
                 <View style={{ flex: 1 }}>
                   <Text style={globalStyles.itemNom}>
-                    {item.nom} (x{item.quantite})
+                    {item.name} (x{item.quantity})
                   </Text>
                   {item.description ? (
                     <Text style={globalStyles.itemDesc}>{item.description}</Text>
@@ -72,7 +72,7 @@ export default function ViewStockScreen({
 
                 <Pressable
                   style={globalStyles.deleteButton}
-                  onPress={() => ouvrirModal(item)} // ✅ ouvre le modal
+                  onPress={() => openModal(item)} // ✅ ouvre le modal
                 >
                   <Text style={globalStyles.deleteButtonText}>X</Text>
                 </Pressable>
@@ -87,7 +87,7 @@ export default function ViewStockScreen({
         visible={selectedLot !== null}
         transparent={true}
         animationType="fade"
-        onRequestClose={fermerModal}
+        onRequestClose={closeModal}
       >
         <View style={globalStyles.modalOverlay}>
           <View style={globalStyles.modalContainer}>
@@ -95,8 +95,8 @@ export default function ViewStockScreen({
             <Text style={globalStyles.modalTitle}>Retirer du stock</Text>
 
             <Text style={{ textAlign: "center", marginBottom: 12, color: "white" }}>
-              {selectedLot?.nom} — stock actuel :{" "}
-              <Text style={{ fontWeight: "bold", color: "white" }}>{selectedLot?.quantite}</Text>
+              {selectedLot?.name} — stock actuel :{" "}
+              <Text style={{ fontWeight: "bold", color: "white" }}>{selectedLot?.quantity}</Text>
             </Text>
 
             <Text style={{ marginBottom: 6, color: "white" }}>Combien voulez-vous retirer ?</Text>
@@ -105,7 +105,7 @@ export default function ViewStockScreen({
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 8 }}>
               <Pressable
                 onPress={() =>
-                  setQuantiteARetirer((v) =>
+                  setquantityToRemove((v) =>
                     String(Math.max(1, (parseInt(v, 10) || 1) - 1))
                   )
                 }
@@ -115,8 +115,8 @@ export default function ViewStockScreen({
               </Pressable>
 
               <TextInput
-                value={quantiteARetirer}
-                onChangeText={setQuantiteARetirer}
+                value={quantityToRemove}
+                onChangeText={setquantityToRemove}
                 keyboardType="numeric"
                 style={{
                   borderWidth: 1,
@@ -133,10 +133,10 @@ export default function ViewStockScreen({
 
               <Pressable
                 onPress={() =>
-                  setQuantiteARetirer((v) => {
+                  setquantityToRemove((v) => {
                     const next = (parseInt(v, 10) || 0) + 1;
                     return String(
-                      selectedLot ? Math.min(next, selectedLot.quantite) : next
+                      selectedLot ? Math.min(next, selectedLot.quantity) : next
                     );
                   })
                 }
@@ -147,27 +147,27 @@ export default function ViewStockScreen({
             </View>
 
             {/* Message d'erreur inline */}
-            {saisieInvalide && (
+            {invalidEntry && (
               <Text style={{ color: "red", fontSize: 12, marginBottom: 8 }}>
-                Quantite invalide (max : {selectedLot?.quantite})
+                Quantite invalide (max : {selectedLot?.quantity})
               </Text>
             )}
 
             {/* Boutons */}
             <View style={{ flexDirection: "row", gap: 12, marginTop: 8 }}>
               <Pressable
-                onPress={fermerModal}
+                onPress={closeModal}
                 style={[globalStyles.deleteButton, { flex: 1 }]}
               >
                 <Text style={globalStyles.deleteButtonText}>Annuler</Text>
               </Pressable>
 
               <Pressable
-                onPress={handleConfirmer}
-                disabled={saisieInvalide}
+                onPress={handleConfirmation}
+                disabled={invalidEntry}
                 style={[
                   globalStyles.deleteButton,
-                  { flex: 1, opacity: saisieInvalide ? 0.4 : 1 },
+                  { flex: 1, opacity: invalidEntry ? 0.4 : 1 },
                 ]}
               >
                 <Text style={globalStyles.deleteButtonText}>Confirmer</Text>

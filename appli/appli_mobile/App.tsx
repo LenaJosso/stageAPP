@@ -16,8 +16,8 @@ import AddLotScreen from "./SCREEN_12CN/AddLotScreen_12CN";
 import ViewStockScreen from "./SCREEN_12CN/ViewStockScreen_12CN";
 import ConnexionBluetoothScreen from "./SCREEN_12CN/ConnexionBluetoothScreen_12CN";
 import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";
-//import CommandeScreen from "./COMMANDE ROUE/DouzesCases_Noir";
-import CommandeScreen from "./COMMANDE ROUE/Roue_BlackJack";
+import CommandeScreen from "./COMMANDE ROUE/DouzesCases_Noir";
+//import CommandeScreen from "./COMMANDE ROUE/Roue_BlackJack";
 
  
 
