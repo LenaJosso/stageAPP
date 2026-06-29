@@ -36,7 +36,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     prevStocks
       .map((lot) =>
         lot.id === id
-          ? { ...lot, quantity: lot.quantity - quantityToRemove } // ✅ Corrigé : "quantity" avec un -y
+          ? { ...lot, quantity: lot.quantity - quantityToRemove } // 
           : lot
       )
       .filter((lot) => lot.quantity > 0) // Supprime automatiquement si <= 0

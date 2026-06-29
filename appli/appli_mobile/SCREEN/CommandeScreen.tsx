@@ -32,7 +32,7 @@ function generateDefaultQuarters(count: number): QuarterDef[] {
   const CouleursAlternées = [
     "#02b801", "#ff0000", "#e6b6ff", "#a137d1", "#ff0000", "#ebff00", 
     "#ffcc00", "#ff0000","#2979ff", "#00e5ff",  "#ff0000", "#abf793"
-  ];
+  ]; 
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     label: `Case ${i + 1}`,
