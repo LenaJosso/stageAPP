@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { Lot, StockContextType } from "../TYPE/type_20CN";
+import { Lot, StockContextType } from "../type";
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
 
@@ -30,18 +30,18 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setStocks((prevStocks) => prevStocks.filter((lot) => lot.id !== id));
   };
 
-  // retire N unités, supprime le lot si quantité tombe à 0
+  //retire N unités, supprime le lot si quantité tombe à 0
   const removeLotQuantity = (id: string, quantityToRemove: number) => {
-    setStocks((prevStocks) =>
-      prevStocks
-        .map((lot) =>
-          lot.id === id
-            ? { ...lot, quantite: lot.quantity - quantityToRemove }
-            : lot
-        )
-        .filter((lot) => lot.quantity > 0)
-    );
-  };
+  setStocks((prevStocks) =>
+    prevStocks
+      .map((lot) =>
+        lot.id === id
+          ? { ...lot, quantity: lot.quantity - quantityToRemove } // ✅ Corrigé : "quantity" avec un -y
+          : lot
+      )
+      .filter((lot) => lot.quantity > 0) // Supprime automatiquement si <= 0
+  );
+};
 
   return (
     <StockContext.Provider value={{ stocks, addLot, deleteLot, removeLotQuantity }}>

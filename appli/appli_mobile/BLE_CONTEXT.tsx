@@ -1,8 +1,10 @@
 import React, { createContext, useContext } from "react";
-import { useEsp32 } from "../USE ESP32/20_CASES_NOIR"; 
-import { BleContextType } from "../TYPE/type_20CN";
+import { useEsp32 } from "./useesp32";
 
-const BleContext = createContext<BleContextType | undefined>(undefined);
+// Le type du contexte est directement dérivé du hook — plus besoin de BleContextType séparé.
+type BleContextValue = ReturnType<typeof useEsp32>;
+
+const BleContext = createContext<BleContextValue | undefined>(undefined);
 
 export const BleProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

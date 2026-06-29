@@ -5,7 +5,7 @@ interface Quartier {
   id: string | number;
   label: string;
   couleur: string;
-  valeur: number;
+  valeur?: number; // optionnel — défaut 1 (cases égales)
 }
 
 interface RoueProps {
@@ -17,18 +17,19 @@ export const Roue: React.FC<RoueProps> = ({ donnees, taille = 300 }) => {
   const rayon = taille / 2;
   const centre = taille / 2;
 
-  const totalValeurs = donnees.reduce((sum, q) => sum + q.valeur, 0);
+  const totalValeurs = donnees.reduce((sum, q) => sum + (q.valeur ?? 1), 0);
   let angleDepart = 0;
 
   return (
     <Svg width={taille} height={taille} viewBox={`0 0 ${taille} ${taille}`}>
       <G>
         {donnees.map((quartier) => {
-          const angleQuartier = (quartier.valeur / totalValeurs) * 360;
+          const valeur = quartier.valeur ?? 1;
+          const angleQuartier = (valeur / totalValeurs) * 360;
           const angleFin = angleDepart + angleQuartier;
 
           const radDepart = (angleDepart - 90) * (Math.PI / 180);
-          const radFin = (angleFin - 90) * (Math.PI / 180);
+          const radFin    = (angleFin    - 90) * (Math.PI / 180);
 
           const x1 = centre + rayon * Math.cos(radDepart);
           const y1 = centre + rayon * Math.sin(radDepart);
@@ -38,16 +39,16 @@ export const Roue: React.FC<RoueProps> = ({ donnees, taille = 300 }) => {
           const grandArc = angleQuartier > 180 ? 1 : 0;
 
           const cheminD = `
-              M ${centre} ${centre}
-              L ${x1} ${y1}
-              A ${rayon} ${rayon} 0 ${grandArc} 1 ${x2} ${y2}
-              Z
-            `;
+            M ${centre} ${centre}
+            L ${x1} ${y1}
+            A ${rayon} ${rayon} 0 ${grandArc} 1 ${x2} ${y2}
+            Z
+          `;
 
           const angleTexte = angleDepart + angleQuartier / 2 - 90;
-          const radTexte = angleTexte * (Math.PI / 180);
-          const xTexte = centre + rayon * 0.6 * Math.cos(radTexte);
-          const yTexte = centre + rayon * 0.6 * Math.sin(radTexte);
+          const radTexte   = angleTexte * (Math.PI / 180);
+          const xTexte     = centre + rayon * 0.6 * Math.cos(radTexte);
+          const yTexte     = centre + rayon * 0.6 * Math.sin(radTexte);
 
           angleDepart = angleFin;
 

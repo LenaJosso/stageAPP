@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, Pressable, Image } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../TYPE/type_12CN";
+import { RootStackParamList } from "../type";
 import { globalStyles } from "../globalStyles";
 import { GradientText } from "../GradientText";
 import { useResponsive } from "../responsive";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBleGlobal } from "../BLE_CONTEXT/CONTEXT_20cases_noir";
+import { useBleGlobal } from "../BLE_CONTEXT";
 
 
 export default function HomeScreen({
@@ -36,8 +36,7 @@ export default function HomeScreen({
           style={[globalStyles.textDegrade, { fontSize: responsive.fontSize(globalStyles.textDegrade.fontSize ?? 16) }]}
           text="Bienvenue sur la télécommande de votre roue"
         />
-        
-{/*Le bouton de connection s'enleve ou apparait selon si on est connecté a l'esp32 ou pas*/}
+        {/*Le bouton de connection s'enleve ou apparait selon si on est connecté a l'esp32 ou pas*/}
        {state.status !== "authenticated" && (
           <Pressable
             style={[globalStyles.button, { marginTop: responsive.number(60), paddingVertical: responsive.number(12), paddingHorizontal: responsive.number(24) }]}
@@ -96,7 +95,9 @@ export default function HomeScreen({
           style={[globalStyles.buttonSidebar, { flex: 1, alignItems: "center", justifyContent: "center" }]}
           onPress={() => navigation.navigate("Commande")}
         >
-        
+          {/*<Text style={[globalStyles.textSibebar, { fontSize: responsive.fontSize(globalStyles.textSibebar.fontSize ?? 11) }]}>
+            Télécommande
+          </Text>*/}
           <Image
           source={require("../assets/remote-icon.png")}
           style={{

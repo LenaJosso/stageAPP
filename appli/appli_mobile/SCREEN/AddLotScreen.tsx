@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, Lot } from "../type";
-import { useStock } from "./StockContext_12C";
-import { globalStyles } from "../globalStyles";
+import { useStock } from "./StockContext";
 import { GradientText } from "../GradientText";
+import { globalStyles } from "../globalStyles";
 import { useResponsive } from "../responsive";
+
 
 export default function AddLotScreen({
   navigation,

@@ -4,54 +4,20 @@ import { View, StatusBar, Text, Pressable } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { globalStyles } from "./globalStyles";
+import { lockAsync, OrientationLock } from "expo-screen-orientation";
 
-// IMPORT 12 CASES NOIRES
-// A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-/*import { StockProvider } from "./SCREEN_12CN/StockContext_12CN";
-import { BleProvider } from "./BLE_CONTEXT/CONTEXT_12cases_noir";
-import { RootStackParamList } from "./TYPE/type_12CN";
 
-import HomeScreen from "./SCREEN_12CN/HomeScreen_12CN";
-import AddLotScreen from "./SCREEN_12CN/AddLotScreen_12CN";
-import ViewStockScreen from "./SCREEN_12CN/ViewStockScreen_12CN";
-import ConnexionBluetoothScreen from "./SCREEN_12CN/ConnexionBluetoothScreen_12CN";
-import StatisticsScreen from "./SCREEN_12CN/StatisticsScreen_12CN";
-import CommandeScreen from "./COMMANDE ROUE/DouzesCases_Noir";*/
-//import CommandeScreen from "./COMMANDE ROUE/Roue_BlackJack";
-
- 
-
-// IMPORT 12 CASES
-// A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-import { StockProvider } from "./SCREEN_12C/StockContext_12C";
-import { BleProvider } from "./BLE_CONTEXT/CONTEXT_12cases";
+import { StockProvider } from "./SCREEN/StockContext";
+import { BleProvider } from "./BLE_CONTEXT";
 import { RootStackParamList } from "./type";
- 
-import HomeScreen from "./SCREEN_12C/HomeScreen_12C";
-import AddLotScreen from "./SCREEN_12C/AddLotScreen_12C";
-import ViewStockScreen from "./SCREEN_12C/ViewStockScreen_12C";
-import ConnexionBluetoothScreen from "./SCREEN_12C/ConnexionBluetoothScreen_12C";
-import CommandeScreen from "./COMMANDE ROUE/DouzesCases";
-import StatisticsScreen from "./SCREEN_12C/StatisticsScreen_12C";
-import { lockAsync, OrientationLock } from 'expo-screen-orientation';
 
-// IMPORT 20 CASES NOIRES
-// A DECOMMENTER ET RECOMMENTER SELON LA ROUE VOULUE
-/*import { StockProvider } from "./SCREEN_20CN/StockContext_20CN";
-import { BleProvider } from "./BLE_CONTEXT/CONTEXT_20cases_noir";
-import { RootStackParamList } from "./TYPE/type_20CN";
+import HomeScreen from "./SCREEN/HomeScreen";
+import AddLotScreen from "./SCREEN/AddLotScreen";
+import ViewStockScreen from "./SCREEN/ViewStockScreen";
+import ConnexionBluetoothScreen from "./SCREEN/ConnexionBluetoothScreen";
+import StatisticsScreen from "./SCREEN/StatisticsScreen";
+import CommandeScreen from "./SCREEN/CommandeScreen";
 
-import HomeScreen from "./SCREEN_20CN/HomeScreen_20CN";
-import AddLotScreen from "./SCREEN_20CN/AddLotScreen_20CN";
-import ViewStockScreen from "./SCREEN_20CN/ViewStockScreen_20CN";
-import ConnexionBluetoothScreen from "./SCREEN_20CN/ConnexionBluetoothScreen_20CN";
-import CommandeScreen from "./COMMANDE ROUE/VingtCases_Noir";
-import StatisticsScreen from "./SCREEN_20CN/StatisticsScreen_20CN";
-import { lockAsync, OrientationLock } from 'expo-screen-orientation';*/
-
-
-/*Pour la roue BLACKJACK, les imports sont les mêmes que les autres, les screens sont les mêmes les seuls fichiers à créer vraiment sont le type_BlackJack et le fichier qui correspond dans le dossier USE ESP 32*/
-/*import CommandeScreen from "./COMMANDE ROUE/Roue_BlackJack";*/
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
