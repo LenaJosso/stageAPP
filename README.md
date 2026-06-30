@@ -40,7 +40,7 @@ L'interface propose plusieurs boutons de commande : la sélection directe (bouto
 Pour les boutons numérotés : Il faut appuyé dessus pour sur le boot de l'esp32, le delock n'est pas géré
 Pour le boutons spin : Il est purement aléatoire, peut tomber sur toutes les leds et sur l'appli n'a pas besoin du boot ni du déverrouillage
 Pour le bankrupt : Il faut appuyé dessus puis sur le boot mde l'esp32, le delock n'est pas géré
-Pour le bouton déverrouiler/ Roue prête : Il se relock tout seul
+Pour le bouton déverrouiler/ Roue prête : Il se relock tout seul à chaque fois qu'on le déverrouille & qu'il y a une action
 
 Je pense que c'est un problème qui vient du code de l'esp32 à l'heure actuelle, car le réel problème n'est pas vraiment le lock/unlock mais le fait que le boot fonctionne dans tous les cas.
 

@@ -623,7 +623,7 @@ export function useEsp32() {
     }
   };
 
-  // Verrouille la roue physiquement (envoie 0 à l'ESP32). Utilisée à la fois
+  // Verrouille la roue physiquement (envoie 0 à l'ESP32). Utilisée à la fois 
   // manuellement et automatiquement par le useEffect ci-dessous.
   //s'occupe du lock de la roue
   const lock = async () => {
@@ -677,7 +677,7 @@ export function useEsp32() {
   };
 
   // Fonction utilitaire générique pour lire n'importe quelle caractéristique BLE
-  // (utilisée pour des lectures ponctuelles hors des helpers dédiés ci-dessus)
+  // (utilisée pour des lectures ponctuelles hors des helpers dédiés ci-dessus) 
   const readCharacteristic = async (characteristicUuid: string): Promise<string | null> => {
     const currentDevice = stateRef.current.device;
     if (!currentDevice || stateRef.current.status !== "authenticated") return null;
@@ -689,6 +689,9 @@ export function useEsp32() {
       return null;
     }
   };
+
+
+  /**/
 
   // Indique si une case donnée contient au moins une LED perdante (utilisé pour le rendu visuel des cases)
   //Pour savoir si le quartier a des leds perdantes 
