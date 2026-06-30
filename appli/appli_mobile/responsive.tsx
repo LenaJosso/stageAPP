@@ -3,6 +3,7 @@ import { Dimensions } from "react-native";
 
 const BaseWidth = 375;
 
+//recupere les tailles de base de de l'écran et fait un rescale 
 export function useResponsive() {
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
 

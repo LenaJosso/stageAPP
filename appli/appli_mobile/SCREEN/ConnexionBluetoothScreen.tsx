@@ -20,6 +20,7 @@ export default function ConnexionBluetoothScreen({
 
   const responsive = useResponsive();
 
+  //valide ou non le code pin
   const handlePinValidation = async () => {
     if (pinInput.length !== 4 && pinInput.length !== 6) {
       alert("Le code PIN doit comporter 4 ou 6 chiffres.");
@@ -41,7 +42,7 @@ export default function ConnexionBluetoothScreen({
   };
 
   const isModalVisible = state.status === "connected";
-  /* (state.status === "scanning" && state.essaisRestants < 3)*/ 
+
   const isInterfaceBloquee =
     state.status === "scanning" || beingSent;
 

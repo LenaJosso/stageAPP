@@ -9,6 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBleGlobal } from "../BLE_CONTEXT";
 
 
+//page d'accueil qui sert surtout de navigation entre chaque page
+
 export default function HomeScreen({
   navigation,
   

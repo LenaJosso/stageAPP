@@ -20,6 +20,8 @@ export default function StatisticsScreen({
 
   const responsive = useResponsive();
 
+
+  //recupération des data données par l'esp pour les réécrire
   useEffect(() => {
     async function loadData() {
       if (state.status !== "authenticated") return;
@@ -80,6 +82,7 @@ export default function StatisticsScreen({
         Statistiques par case :
       </Text>
 
+{/*recupere les hits par index */}
       {hitsPerCase.map((hits, index) => (
         <Text
           key={index}

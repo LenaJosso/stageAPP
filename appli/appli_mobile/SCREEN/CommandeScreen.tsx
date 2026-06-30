@@ -223,7 +223,7 @@ export default function CommandeScreen({
     <View style={[globalStyles.mainContainer, { flex: 1, paddingTop: insets.top }]}>
       <View style={[globalStyles.rightContainer, { flex: 1, padding: responsive.number(10), justifyContent: "space-between" }]}>
         
-        {/* SECTION SUPERIEURE */} {/*s'affiche que si pas connecter*/}
+        {/* SECTION SUPERIEURE */} {/*s'affiche que si on n'est pas connecter, c'est un message */}
         <View style={{ flex: 1.2, width: "100%", alignItems: "center", justifyContent: "flex-start" }}>
           {isDisabled && (
             <Text style={[globalStyles.error, { marginBottom: responsive.number(5), textAlign: "center", fontSize: responsive.fontSize(12) }]}>
@@ -251,7 +251,7 @@ export default function CommandeScreen({
               justifyContent: "center",
               alignItems: "center",
             }}>
-              <Roue donnees={quarters} taille={WheelSize} /> {/*Afifche la roue en fonction des données de l'esp32 + des calculs du ficher Roue.tsx*/}
+              <Roue donnees={quarters} taille={WheelSize} /> {/*Affiche la roue en fonction des données de l'esp32 + des calculs du ficher Roue.tsx*/}
 
               {/*Calcul pour les leds et les angles pour les rotations et les placement */}
               {ledsPerCase > 1 && quarters.map((_, qIdx) => {

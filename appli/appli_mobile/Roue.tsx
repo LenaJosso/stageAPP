@@ -23,6 +23,8 @@ export const Roue: React.FC<RoueProps> = ({ donnees, taille = 300 }) => {
   return (
     <Svg width={taille} height={taille} viewBox={`0 0 ${taille} ${taille}`}>
       <G>
+        {/*tous les calculs permettant le calcul du desing de la roue selon le nombre
+        de quartier donné par l'esp */}
         {donnees.map((quartier) => {
           const valeur = quartier.valeur ?? 1;
           const angleQuartier = (valeur / totalValeurs) * 360;

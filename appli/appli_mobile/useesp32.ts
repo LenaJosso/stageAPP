@@ -311,7 +311,7 @@ export function useEsp32() {
         status: "scanning",
         error: null,
         remainingTrials: 3,
-        statusText: "Recherche globale de l'appareil...",
+        statusText: "Recherche globale de l'appareil...", 
         history: [],
       }));
 
@@ -331,7 +331,7 @@ export function useEsp32() {
       setState((s) => ({ ...s, error: "Aucun appareil disponible pour l'envoi du PIN" }));
       return false;
     }
-
+//
     try {
       // Le PIN est envoyé en uint32 little-endian, format attendu par le firmware
       const pinNumber = parseInt(pinStr, 10);
@@ -346,7 +346,7 @@ export function useEsp32() {
       let currentConfig = await fetchWheelConfig(currentDevice);
       
       // Si la config n'est pas encore "loaded" côté ESP32, on déclenche son chargement
-      // puis on la relit une seconde fois
+      // puis on la relit une seconde fois 
       if (!currentConfig.loaded) {
         await currentDevice.writeCharacteristicWithResponseForService(
           SERVICE_UUID,
@@ -468,7 +468,7 @@ export function useEsp32() {
       await AsyncStorage.removeItem(STORAGE_KEY_LAST_PIN).catch(() => {});
 
       if (newTrials <= 0) {
-        // Trop d'échecs : on bloque complètement et on force une reconnexion manuelle ultérieure
+        //si  nombre d'essais a 0 : on bloque complètement et on force une reconnexion manuelle ultérieure
         setState((s) => ({
           ...s,
           status: "error",
@@ -542,7 +542,7 @@ export function useEsp32() {
     }
 
     // Mémorise si ce spin est "forcé" (BANKRUPT) pour orienter le choix de la LED
-    // une fois le résultat reçu par notification
+    // un efois le résultat reçu par notification
     isLaunchedTarget.current = targetIndex !== undefined;
 
 

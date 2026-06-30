@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+ import React, { useState } from "react";
 import { View, Text, FlatList, Pressable, Modal, TextInput } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useStock } from "./StockContext";
@@ -10,28 +10,36 @@ import { useResponsive } from "../responsive";
 export default function ViewStockScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "ViewStock">): React.JSX.Element {
+  // On récupère la liste des lots et l'action de retrait depuis le contexte global du stock
   const { stocks, removeLotQuantity } = useStock();
   const responsive = useResponsive();
 
+  // Lot actuellement sélectionné pour un retrait (null = aucune modal ouverte)
   const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
+  // Quantité à retirer, stockée en string car liée directement au TextInput
   const [quantityToRemove, setquantityToRemove] = useState("1");
 
+  // Ouvre la modal de retrait pour un lot donné et réinitialise la quantité à 1
   const openModal = (lot: Lot) => {
     setSelectedLot(lot);
     setquantityToRemove("1"); 
   };
 
+  // Ferme la modal et réinitialise les états liés au retrait
   const closeModal = () => {
     setSelectedLot(null);
     setquantityToRemove("1");
   };
 
+  // Valide et applique le retrait de quantité sur le lot sélectionné
   const handleConfirmation = () => {
     if (!selectedLot) return;
 
     const quantity = parseInt(quantityToRemove, 10);
 
     // Protections de sécurité poussées
+    // On bloque si la valeur n'est pas un nombre valide, négative/nulle,
+    // ou si elle dépasse la quantité réellement disponible dans le lot
     if (isNaN(quantity) || quantity <= 0) return; 
     if (quantity > selectedLot.quantity) return;   
 
@@ -41,6 +49,8 @@ export default function ViewStockScreen({
     closeModal();
   };
 
+  // Calcul dérivé (recalculé à chaque render) pour savoir si la quantité saisie est invalide,
+  // utilisé à la fois pour désactiver le bouton "Confirmer" et afficher le message d'erreur
   const quantityEntry = parseInt(quantityToRemove, 10);
   const invalidEntry =
     isNaN(quantityEntry) ||
@@ -55,6 +65,7 @@ export default function ViewStockScreen({
           text="Liste du Stock"
         />
 
+        {/* Affiche un message si le stock est vide, sinon la liste des lots */}
         {stocks.length === 0 ? (
           <Text style={[globalStyles.emptyText, { fontSize: responsive.fontSize(14), marginTop: responsive.number(20) }]}>
             Aucun produit en stock pour le moment.
@@ -77,6 +88,7 @@ export default function ViewStockScreen({
                   ) : null}
                 </View>
 
+                {/* Le bouton "X" ouvre la modal de retrait plutôt que de supprimer directement le lot */}
                 <Pressable
                   style={[globalStyles.deleteButton, { padding: responsive.number(8) }]}
                   onPress={() => openModal(item)}
@@ -90,6 +102,7 @@ export default function ViewStockScreen({
       </View>
 
       {/* Modal Responsive et Sécurisé */}
+      {/* La modal est visible dès qu'un lot est sélectionné (selectedLot !== null) */}
       <Modal
         visible={selectedLot !== null}
         transparent={true}
@@ -114,6 +127,7 @@ export default function ViewStockScreen({
 
             {/* Sélecteur +/- Responsive */}
             <View style={{ flexDirection: "row", alignItems: "center", gap: responsive.number(12), marginBottom: responsive.number(8) }}>
+              {/* Bouton "-" : ne descend jamais en dessous de 1 */}
               <Pressable
                 onPress={() =>
                   setquantityToRemove((v) =>
@@ -125,6 +139,7 @@ export default function ViewStockScreen({
                 <Text style={{ fontSize: responsive.fontSize(18), color: "white", fontWeight: "bold" }}>−</Text>
               </Pressable>
 
+              {/* Saisie manuelle de la quantité, filtrée pour n'accepter que des chiffres */}
               <TextInput
                 value={quantityToRemove}
                 onChangeText={(text) => setquantityToRemove(text.replace(/[^0-09]/g, ''))} // Filtre pour ne garder que les chiffres requis
@@ -142,6 +157,7 @@ export default function ViewStockScreen({
                 }}
               />
 
+              {/* Bouton "+" : plafonné à la quantité disponible dans le lot sélectionné */}
               <Pressable
                 onPress={() =>
                   setquantityToRemove((v) => {
@@ -157,7 +173,7 @@ export default function ViewStockScreen({
               </Pressable>
             </View>
 
-            {/* Message d'erreur inline */}
+            {/* Message d'erreur inline, affiché seulement si la saisie est invalide */}
             {invalidEntry && (
               <Text style={{ color: "#ff4d4d", fontSize: responsive.fontSize(12), marginBottom: responsive.number(8), textAlign: "center" }}>
                 Quantité invalide (max : {selectedLot?.quantity})
@@ -173,6 +189,7 @@ export default function ViewStockScreen({
                 <Text style={[globalStyles.deleteButtonText, { fontSize: responsive.fontSize(14) }]}>Annuler</Text>
               </Pressable>
 
+              {/* Bouton désactivé tant que la quantité saisie n'est pas valide */}
               <Pressable
                 onPress={handleConfirmation}
                 disabled={invalidEntry}
