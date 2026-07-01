@@ -31,15 +31,28 @@ type CommandeScreenProps = {
 // Génère les quartiers par défaut si l'utilisateur n'en fournit pas via les props
 // (utilisé notamment si l'ESP32 n'a pas encore renvoyé sa config, ou pour des tests)
 //peut-être rajouter un if 20 ou 12 cases et mettre les couleurs en fonction ? Puisque c'est la seule réelle différence entre les deux ?
+// Couleurs utilisées quand la roue a 12 cases
+const Couleurs12Cases = [
+  "#02b801", "#ff0000", "#e6b6ff", "#a137d1", "#ff0000", "#ebff00",
+  "#ffcc00", "#ff0000", "#2979ff", "#00e5ff", "#ff0000", "#abf793"
+];
+
+// Couleurs utilisées quand la roue a 20 cases
+const Couleurs20Cases = [
+  "#ff49b3", "#ebff00", "#ff0000", "#02b801", "#22d3ee", "#ff49b3",
+  "#ebff00", "#ff0000", "#02b801", "#00e5ff", "#ff49b3", "#ebff00",
+  "#ff0000", "#02b801", "#22d3ee", "#ff49b3", "#ebff00", "#ff0000",
+  "#02b801", "#22d3ee"
+];
+
 function generateDefaultQuarters(count: number): QuarterDef[] {
-  const CouleursAlternées = [
-    "#02b801", "#ff0000", "#e6b6ff", "#a137d1", "#ff0000", "#ebff00", 
-    "#ffcc00", "#ff0000","#2979ff", "#00e5ff",  "#ff0000", "#abf793"
-  ]; 
+  // On choisit le bon jeu de couleurs selon le nombre de cases renvoyé par l'ESP32
+  const palette = count === 20 ? Couleurs20Cases : Couleurs12Cases;
+
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     label: `Case ${i + 1}`,
-    couleur: CouleursAlternées[i % CouleursAlternées.length],
+    couleur: palette[i % palette.length],
   }));
 }
 
@@ -223,7 +236,7 @@ export default function CommandeScreen({
     <View style={[globalStyles.mainContainer, { flex: 1, paddingTop: insets.top }]}>
       <View style={[globalStyles.rightContainer, { flex: 1, padding: responsive.number(10), justifyContent: "space-between" }]}>
         
-        {/* SECTION SUPERIEURE */} {/*s'affiche que si on n'est pas connecter, c'est un message */}
+        {/* SECTION SUPERIEURE */}{/*s'affiche que si on n'est pas connecter, c'est un message */}
         <View style={{ flex: 1.2, width: "100%", alignItems: "center", justifyContent: "flex-start" }}>
           {isDisabled && (
             <Text style={[globalStyles.error, { marginBottom: responsive.number(5), textAlign: "center", fontSize: responsive.fontSize(12) }]}>
@@ -235,13 +248,12 @@ export default function CommandeScreen({
             <Text style={{ fontSize: responsive.fontSize(18), fontWeight: "bold", color: "#ffffff" }}>
               {winningPrize ? `Résultat : ${winningPrize}` : "Résultat : "}
             </Text>
-          </View>
+          </View> 
 
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <View style={{ marginBottom: responsive.number(-5), zIndex: 10 }}> 
               <Triangle />
             </View>
-
             {/*Permet l'animation de tout ce qui est à l'intérieur du Animated.View */}
             <Animated.View style={{
               opacity: isDisabled ? 0.5 : 1,
@@ -251,7 +263,7 @@ export default function CommandeScreen({
               justifyContent: "center",
               alignItems: "center",
             }}>
-              <Roue donnees={quarters} taille={WheelSize} /> {/*Affiche la roue en fonction des données de l'esp32 + des calculs du ficher Roue.tsx*/}
+              <Roue donnees={quarters} taille={WheelSize} />{/*Affiche la roue en fonction des données de l'esp32 + des calculs du ficher Roue.tsx*/}
 
               {/*Calcul pour les leds et les angles pour les rotations et les placement */}
               {ledsPerCase > 1 && quarters.map((_, qIdx) => {
@@ -328,10 +340,6 @@ export default function CommandeScreen({
             opacity: isDisabled ? 0.5 : 1, gap: responsive.number(6),
             marginTop: responsive.number(5)
           }}>
-            <Pressable disabled={isAnySpinning} style={[globalStyles.btnSpin, { padding: responsive.number(10), minWidth: responsive.number(75) }]} 
-            onPress={() => manageClickTurn()}>
-              <Text style={[globalStyles.btnText, { fontSize: responsive.fontSize(13) }]}>SPIN</Text>
-            </Pressable>
                         
             <Pressable 
               disabled={isAnySpinning} 

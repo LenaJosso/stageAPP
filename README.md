@@ -37,9 +37,10 @@ Un ecouteur useEffect surveille l'etat bluetooth de la roue. Dès qu'un résulta
 ##### A.3 Bouton d'interaction et d'action :
 L'interface propose plusieurs boutons de commande : la sélection directe (bouton numéroté pour chaque quartier), bouton SPIN (Lance un tirage classique aléatoire), bouton BANKRUPT ( tombe sur une des leds pêrdantes au hasard) et le bouton de Déverrouillage (pour débloquer et permettre l'utilisation de la roue. Ce bouton se reset à chaque tour pour permettre un sécu optimal et éviter toute triche du client).
 
-Pour les boutons numérotés : Il faut appuyé dessus pour sur le boot de l'esp32, le delock n'est pas géré
-Pour le boutons spin : Il est purement aléatoire, peut tomber sur toutes les leds et sur l'appli n'a pas besoin du boot ni du déverrouillage
+Pour les boutons numérotés : Il faut appuyé dessus puis sur le boot de l'esp32, le delock n'est pas géré 
+
 Pour le bankrupt : Il faut appuyé dessus puis sur le boot mde l'esp32, le delock n'est pas géré
+
 Pour le bouton déverrouiler/ Roue prête : Il se relock tout seul à chaque fois qu'on le déverrouille & qu'il y a une action
 
 Je pense que c'est un problème qui vient du code de l'esp32 à l'heure actuelle, car le réel problème n'est pas vraiment le lock/unlock mais le fait que le boot fonctionne dans tous les cas.
