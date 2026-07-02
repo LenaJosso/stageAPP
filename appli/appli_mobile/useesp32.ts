@@ -375,16 +375,16 @@ export function useEsp32() {
       RESULT_CHAR_UUID,
       (e, characteristic) => {
         if (e) {
-          console.error("Erreur lors du monitor de RESULT_CHAR :", e);
+           console.error("Erreur lors du monitor de RESULT_CHAR :", e);
           return;
         }
         if (!characteristic?.value) return;
 
         const bytesNotify = Buffer.from(characteristic.value, "base64");
-        const rawCounter = bytesNotify.readUInt8(0);
+        const rawCounter = bytesNotify.readUInt8(0);    
         console.log("Notification reçue, rawCounter brut =", rawCounter);
 
-        const currentConfig = stateRef.current.config;
+        const currentConfig = stateRef.current.config;  
         const casesCount = currentConfig?.numCases || 12;
         
         // On garde la case brute calculée, SANS AUCUN DÉCALAGE NI FILTRE 'while' !
@@ -607,7 +607,7 @@ export function useEsp32() {
   // Déverrouille la roue physiquement (envoie 1 à l'ESP32) et met l'UI à jour immédiatement.
   // Le re-verrouillage automatique après quelques secondes est géré par le useEffect plus bas.
   //Déverrouille la roue
-  const unlock = async () => {
+  const   unlock = async () => {
     const currentDevice = stateRef.current.device;
     if (!currentDevice || stateRef.current.status !== "authenticated") return;
 
@@ -621,7 +621,7 @@ export function useEsp32() {
     } catch (e) {
       console.error("Erreur lors du déverrouillage :", e);
     }
-  };
+  };  
 
   // Verrouille la roue physiquement (envoie 0 à l'ESP32). Utilisée à la fois 
   // manuellement et automatiquement par le useEffect ci-dessous.

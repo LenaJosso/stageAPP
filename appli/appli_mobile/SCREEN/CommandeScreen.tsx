@@ -265,7 +265,7 @@ export default function CommandeScreen({
             }}>
               <Roue donnees={quarters} taille={WheelSize} />{/*Affiche la roue en fonction des données de l'esp32 + des calculs du ficher Roue.tsx*/}
 
-              {/*Calcul pour les leds et les angles pour les rotations et les placement */}
+              {/*Calcul pour les leds et les angles pour les rotations et les placement */} 
               {ledsPerCase > 1 && quarters.map((_, qIdx) => {
                 const baseAngle = qIdx * anglePerQuarter;
                 return Array.from({ length: ledsPerCase }, (__, ledIdx) => {
@@ -321,7 +321,7 @@ export default function CommandeScreen({
                     backgroundColor: quartier.couleur, 
                     paddingVertical: responsive.number(10), 
                     paddingHorizontal: responsive.number(14),
-                    minWidth: responsive.number(46),
+                    minWidth: responsive.number(46),  
                     borderRadius: responsive.number(6)
                   }]}
                   onPress={() => manageClickTurn(idx)}
@@ -342,7 +342,7 @@ export default function CommandeScreen({
           }}>
                         
             <Pressable 
-              disabled={isAnySpinning} 
+              disabled={isAnySpinning}    
               style={[
                 globalStyles.btnSpin, 
                 { padding: responsive.number(10), minWidth: responsive.number(100) } // Rouge Banqueroute
@@ -384,22 +384,25 @@ export default function CommandeScreen({
         </Text>
         <ScrollView horizontal contentContainerStyle={globalStyles.sidebarScroll} showsHorizontalScrollIndicator={false}>
           {/*On va chercher l'historique et il se refresh à chaque tirage de roue */}
-          {state.history.map((idLot, index) => {
-            const quarter = quarters.find((q) => q.id === idLot);
-            return (
-              <View key={index} style={[globalStyles.historyItem, { paddingHorizontal: responsive.number(6), height: responsive.number(26) }]}>
-                <Text style={[globalStyles.historyIndex, { fontSize: responsive.fontSize(11) }]}>{index + 1}.</Text>
-                <View style={{
-                  width: responsive.number(8), height: responsive.number(8), borderRadius: responsive.number(4),
-                  backgroundColor: quarter?.couleur ?? "#ccc",
-                  marginRight: responsive.number(6), alignSelf: "center",
-                }} />
-                <Text style={[globalStyles.historyText, { fontSize: responsive.fontSize(11) }]}>
-                  {quarter ? quarter.label : `Lot ${idLot}`}
-                </Text>
-              </View>
-            );
-          })}
+{/*On inverse l'ordre d'affichage pour que le dernier tirage soit visible en premier,
+    tout en gardant le vrai numéro chronologique (le 1er tirage reste "1.", même affiché en dernier) */}
+{[...state.history].reverse().map((idLot, reverseIndex) => {
+  const index = state.history.length - 1 - reverseIndex;
+  const quarter = quarters.find((q) => q.id === idLot);
+  return (
+    <View key={index} style={[globalStyles.historyItem, { paddingHorizontal: responsive.number(6), height: responsive.number(26) }]}>
+      <Text style={[globalStyles.historyIndex, { fontSize: responsive.fontSize(11) }]}>{index + 1}.</Text>
+      <View style={{
+        width: responsive.number(8), height: responsive.number(8), borderRadius: responsive.number(4),
+        backgroundColor: quarter?.couleur ?? "#ccc",
+        marginRight: responsive.number(6), alignSelf: "center",
+      }} />
+      <Text style={[globalStyles.historyText, { fontSize: responsive.fontSize(11) }]}>
+        {quarter ? quarter.label : `Lot ${idLot}`}
+      </Text>
+    </View>
+  );
+})}      
           {state.history.length === 0 && (
             <Text style={[globalStyles.emptyHistory, { fontSize: responsive.fontSize(11), textAlign: "center", width: windowWidth }]}>Aucun tirage</Text>
           )}

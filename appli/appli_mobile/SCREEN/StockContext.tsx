@@ -11,8 +11,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Ajoute un nouveau lot au stock.
   // Si un lot avec le même nom ET la même description existe déjà (comparaison insensible
-  // à la casse et aux espaces superflus), on fusionne les quantités au lieu de créer un doublon.
-  const addLot = (newLot: Lot) => {
+  // à la casse et aux espaces superflus), on fusionne les quantités au lieu de créer un doublon. +  
+  const addLot = (newLot: Lot) => {    
     setStocks((prevStocks) => {
       const existingIndex = prevStocks.findIndex(
         (lot) =>
@@ -36,7 +36,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Supprime entièrement un lot du stock, quelle que soit sa quantité restante
   const deleteLot = (id: string) => {
-    setStocks((prevStocks) => prevStocks.filter((lot) => lot.id !== id));
+    setStocks((prevStocks) => prevStocks.filter((lot) => lot.id !== id));      
   };
 
   //retire N unités, supprime le lot si quantité tombe à 0
@@ -66,7 +66,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 // en dehors d'un StockProvider, pour éviter un context undefined silencieux
 export const useStock = () => {
   const context = useContext(StockContext);
-  if (!context)
+  if (!context)    
     throw new Error("useStock doit être utilisé dans un StockProvider");
   return context;
 };

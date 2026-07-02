@@ -29,7 +29,9 @@ Il contient tous les screens différents qui seront dans l'application : l'Accue
 Ce fichier est l'écran de contrôle principal. C'est là que le user visualise la roue, interagit avec elle et observe le résultat.
 
 ##### A.1 Contruction et géométrie de la roue : 
-Le script calcule automatiquement la taille de la roue et des leds en fonction des dimensions de l'écran. Si aucune liste n'est donnée par l'esp32, il génère une roue par défaut. Si la config de la roue indique plusieurs leds par quartier, le fichier utilise des formules trigo pour disposer chaque led au bon endroit. Les leds définit "perdantes" sont coloréss en noir et les autres restent grises.
+Le script calcule automatiquement la taille de la roue et des leds en fonction des dimensions de l'écran. Si aucune liste n'est donnée par l'esp32, il génère une roue par défaut. Si la config de la roue indique plusieurs leds par quartier, le fichier utilise des formules trigo pour disposer chaque led au bon endroit. Les leds définit "perdantes" sont coloréss en noir et les autres restent grises. 
+
+C'est là aussi qu'on gère la couleur selon si l'esp32 dit que c'est une roue à 12 ou 20 cases. C'est juste un if en soit
 
 ##### A.2 Gestion des animations  :
 Un ecouteur useEffect surveille l'etat bluetooth de la roue. Dès qu'un résultat valide est demandé, une animation de rotation fluide est initialisé. L'animation calcule l'angle exact à atteindre pour que la led demandé tombe pile sous le triangle se trouvant au dessus de la roue. AZ la fin de la rotation, l'appli vérifie si la Led finale est enregistrée dans les perdantes et si c'est le cas elle affiche "Bankrupt", sinon elle affiche le numéro de la case.
