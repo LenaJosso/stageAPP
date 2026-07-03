@@ -19,7 +19,13 @@
     },
     "production": {
       "autoIncrement": true
-    }
+    }, 
+    "preview2":{
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "buildType": "apk"
+      }
+    },
   },
   "submit": {
     "production": {}

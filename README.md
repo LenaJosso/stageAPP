@@ -78,7 +78,7 @@ Il récupère l'historique des derniers tirages stockés dans la mémoire flash 
 ### 3. Fichier BLE_CONTEXT.tsx :
 Ce fichier crée et exporte un Context React (BLEContext) pour partager globalement l'état et les fonctions Bluetooth de la roue
 #### A. BleProvider :
-C'est le composant "enveloppe" qui encapsule le hook useesp32 et distribue ses données à tous ses composants enfants.
+C'est le composant "enveloppe" qui encapsule le hook useesp32 et distribue ses données à tous ses composants enfants.    
 
 #### B. useBleGlobal :
 C'est un hook personnalisé qui permet qui permet à n'importe quel fichier d'accéder aux fonctions de la roue (spinWheel, unlock, etc...) 

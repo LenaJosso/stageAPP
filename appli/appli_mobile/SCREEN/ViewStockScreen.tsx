@@ -2,10 +2,10 @@
 import { View, Text, FlatList, Pressable, Modal, TextInput } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useStock } from "./StockContext";
-import { globalStyles } from "../../DESIGN/globalStyles";
+import { globalStyles } from "../DESIGN/globalStyles";
 import { RootStackParamList, Lot } from "../type";
-import { GradientText } from "../../DESIGN/GradientText";
-import { useResponsive } from "../../DESIGN/responsive";
+import { GradientText } from "../DESIGN/GradientText";
+import { useResponsive } from "../DESIGN/responsive";
 
 export default function ViewStockScreen({
   navigation,

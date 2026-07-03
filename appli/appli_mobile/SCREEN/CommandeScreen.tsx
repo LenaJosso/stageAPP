@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Roue } from "../../DESIGN/Roue";
-import Triangle from "../../DESIGN/Triangle";
-import { globalStyles } from "../../DESIGN/globalStyles";
-import { useResponsive } from "../../DESIGN/responsive";
+import { Roue } from "../DESIGN/Roue";
+import Triangle from "../DESIGN/Triangle";
+import { globalStyles } from "../DESIGN/globalStyles";
+import { useResponsive } from "../DESIGN/responsive";
 
 export type QuarterDef = {
   id: number;

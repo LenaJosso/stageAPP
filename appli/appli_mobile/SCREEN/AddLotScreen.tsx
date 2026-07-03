@@ -3,9 +3,9 @@ import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, Lot } from "../type";
 import { useStock } from "./StockContext";
-import { GradientText } from "../../DESIGN/GradientText";
-import { globalStyles } from "../../DESIGN/globalStyles";
-import { useResponsive } from "../../DESIGN/responsive";
+import { GradientText } from "../DESIGN/GradientText";
+import { globalStyles } from "../DESIGN/globalStyles";
+import { useResponsive } from "../DESIGN/responsive";
 
 
 export default function AddLotScreen({

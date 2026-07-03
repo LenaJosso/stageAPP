@@ -2,9 +2,9 @@ import React from "react";
 import { View, Text, Pressable, Image } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../type";
-import { globalStyles } from "../../DESIGN/globalStyles";
-import { GradientText } from "../../DESIGN/GradientText";
-import { useResponsive } from "../../DESIGN/responsive";
+import { globalStyles } from "../DESIGN/globalStyles";
+import { GradientText } from "../DESIGN/GradientText";
+import { useResponsive } from "../DESIGN/responsive";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBleGlobal } from "../BLE_CONTEXT";
 
