@@ -96,7 +96,16 @@ Il enveloppe l'ensemble de l'application sous deux injecteurs de données globau
 #### C. Système de navigation : 
 Il configure le système de routage de l'application grâce à un gestionnaire d'écrans en pile (Stack). Il dit que HomeScreen sera la page de départ et répertorie les 6 fenêtres naviguables de l'appli.
 
-### 5. Fichier responsive.tsx :
+
+
+### 5. Fichier type.ts
+Ce fichier regroupe les définitions de types de l'application afin de sécuriser l'architecture et les données. 
+Il définit d'abord la structure Bluetooth (BleContextType) pour partager proprement les fonctions d'interaction avec la roue ESP32 via un contexte React. 
+Il configure également le routage de l'application (RootStackParamList) en listant tous les écrans disponibles (Accueil, Stock, Bluetooth, Commande, etc.) pour interdire les erreurs de navigation. Enfin, il modélise la structure d'un Lot et le comportement attendu du gestionnaire de stocks (StockContextType), imposant les fonctions indispensables pour ajouter, supprimer ou décrémenter automatiquement les récompenses à chaque tirage de la roue.
+
+### Dossier DESIGN
+
+### 6. Fichier responsive.tsx :
 Ce fichier fournit un hook React Native permettant d'adapter dynamiquement l'interface à toutes les tailles d'écrans 
 
 #### A. Ecoute du changement de taille :
@@ -108,14 +117,8 @@ Il compare la largeur réelle de l'écran à une largeur par défautr pour calcu
 #### C. Outils d'adaptation :
 Il exporte les fonctions "fontsize" et "number" pour redimensionner automatiquement les textes, marges et composants graphiques ainsi que les variables "deviceWidth" et "deviceHeight" pour avoir constamment les dimensions de l'appareil.
 
-### 6. Fichier Triangle.tsx et Roue.tsx
+### 7. Fichier Triangle.tsx et Roue.tsx
 Ces deux fichiers sont les calculs/ dessins en SVG (Scalable Vector Graphics, langage conçu pour décrire des graphiques vectoriels permettant d'avoir un rendu très propre sans pixel visible) qui permettent la création visuel d'une Roue et du petit Triangle servant de repère au dessus de la Roue.
-
-### 7. Fichier type.ts
-Ce fichier regroupe les définitions de types de l'application afin de sécuriser l'architecture et les données. 
-Il définit d'abord la structure Bluetooth (BleContextType) pour partager proprement les fonctions d'interaction avec la roue ESP32 via un contexte React. 
-Il configure également le routage de l'application (RootStackParamList) en listant tous les écrans disponibles (Accueil, Stock, Bluetooth, Commande, etc.) pour interdire les erreurs de navigation. Enfin, il modélise la structure d'un Lot et le comportement attendu du gestionnaire de stocks (StockContextType), imposant les fonctions indispensables pour ajouter, supprimer ou décrémenter automatiquement les récompenses à chaque tirage de la roue.
-
 
 ### 8. Fichier GradientText.tsx et globalStyles.ts: 
 Ce fichier définit un composant réutilisable permettant d'appliquer un dégradé de couleur sur du texte. Je l'ai utilisé pour les gros titres des screens de l'appli, pour un jolie rendu qui en plus faire un rappel au logo Lémia.
