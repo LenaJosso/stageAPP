@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import { useBleGlobal } from "../BLE_CONTEXT";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Roue } from "../Roue";
-import Triangle from "../Triangle";
-import { globalStyles } from "../globalStyles";
-import { useResponsive } from "../responsive";
+import { Roue } from "../../DESIGN/Roue";
+import Triangle from "../../DESIGN/Triangle";
+import { globalStyles } from "../../DESIGN/globalStyles";
+import { useResponsive } from "../../DESIGN/responsive";
 
 export type QuarterDef = {
   id: number;
@@ -28,9 +28,7 @@ type CommandeScreenProps = {
   ledRadiusBase?: number;
 };
 
-// Génère les quartiers par défaut si l'utilisateur n'en fournit pas via les props
-// (utilisé notamment si l'ESP32 n'a pas encore renvoyé sa config, ou pour des tests)
-//peut-être rajouter un if 20 ou 12 cases et mettre les couleurs en fonction ? Puisque c'est la seule réelle différence entre les deux ?
+
 // Couleurs utilisées quand la roue a 12 cases
 const Couleurs12Cases = [
   "#02b801", "#ff0000", "#e6b6ff", "#a137d1", "#ff0000", "#ebff00",

@@ -10,5 +10,5 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo"
-  ]
+, "../DESIGN/Triangle.tsx", "../DESIGN/Roue.tsx", "../DESIGN/responsive.tsx", "../DESIGN/GradientText.tsx", "../DESIGN/globalStyles.ts"  ]
 }

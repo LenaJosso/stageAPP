@@ -3,10 +3,10 @@ import { View, Text, TextInput, Pressable, Modal } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../type";
 import { useBleGlobal } from "../BLE_CONTEXT";
-import { GradientText } from "../GradientText";
-import { globalStyles } from "../globalStyles";
+import { GradientText } from "../../DESIGN/GradientText";
+import { globalStyles } from "../../DESIGN/globalStyles";
 
-import { useResponsive } from "../responsive";
+import { useResponsive } from "../../DESIGN/responsive";
 
 export default function ConnexionBluetoothScreen({
   navigation,

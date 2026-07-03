@@ -20,10 +20,13 @@ Plutôt que d'utiliser des images fixes qui risqueraient de pixeliser selon la t
 ### 3. Gestion de l'Inventaire
 L'application intègre un module de gestion des stocks pour l'exploitant. Lorsqu'un nouveau lot est ajouté, si un produit du même type existe déjà, le système fusionne automatiquement les informations et met à jour la quantité globale. Des fenêtres de confirmation sécurisent les actions pour éviter toute suppression accidentelle.
 
+
 ## Commentaires et notes sur le projet
 
 ### 1. Dossier Screen
 Il contient tous les screens différents qui seront dans l'application : l'Accueil, La Connexion Bluetooth, l'Ajout de Lot, la Visualisation des stocks, la télécommande des Roues et les Statistiques. Il contient également le "stockContext" qui inclut la défintion des constantes pour ajouter et supprimer des lots.
+
+StockContext.tsx n'est pas un screen mais il contient les constantes pour ajouter et retirer des lots 
 
 #### A. Fichier CommandeScreen (le + important) :
 Ce fichier est l'écran de contrôle principal. C'est là que le user visualise la roue, interagit avec elle et observe le résultat.

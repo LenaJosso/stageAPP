@@ -4,9 +4,9 @@ import { useBleGlobal } from "../BLE_CONTEXT";
 import { RootStackParamList, Lot } from "../type";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Buffer } from "buffer";
-import { GradientText } from "../GradientText";
-import { globalStyles } from "../globalStyles";
-import { useResponsive } from "../responsive";
+import { GradientText } from "../../DESIGN/GradientText";
+import { globalStyles } from "../../DESIGN/globalStyles";
+import { useResponsive } from "../../DESIGN/responsive";
 
 export default function StatisticsScreen({
   navigation,
